@@ -1,0 +1,110 @@
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #f9f9ff;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(27,58,107,0.06), transparent 50%),
+      radial-gradient(circle at 85% 20%, rgba(0,105,109,0.04), transparent 50%);
+    background-attachment: fixed;
+    color: #131c2a;
+    -webkit-font-smoothing: antialiased;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.80);
+    box-shadow: 0 4px 24px rgba(27,58,107,0.08);
+    border-radius: 1rem;
+  }
+  .glass-card-sm {
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255,255,255,0.80);
+    box-shadow: 0 4px 24px rgba(27,58,107,0.08);
+    border-radius: 0.75rem;
+  }
+  .glass-header { border-bottom: 1px solid rgba(255,255,255,0.4); padding-bottom: 0.75rem; }
+  .glass-topbar {
+    background: rgba(249,249,255,0.85);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(196,198,208,0.40);
+    box-shadow: 0 2px 8px rgba(27,58,107,0.06);
+  }
+  .btn-primary {
+    @apply bg-secondary text-on-secondary font-label-caps text-label-caps
+           px-6 py-2.5 rounded-full transition-all duration-200
+           hover:opacity-90 active:scale-95 inline-flex items-center gap-2;
+    box-shadow: 0 4px 16px rgba(0,105,109,0.25);
+  }
+  .btn-outline {
+    @apply border border-secondary text-secondary font-label-caps text-label-caps
+           px-6 py-2.5 rounded-full transition-all duration-200
+           hover:bg-secondary/5 active:scale-95 inline-flex items-center gap-2;
+  }
+  .btn-ghost {
+    @apply text-outline font-label-caps text-label-caps px-4 py-2 rounded-full
+           transition-all duration-200 hover:bg-black/5 active:scale-95
+           inline-flex items-center gap-2;
+  }
+  .chip-success { @apply px-3 py-1 rounded-full bg-secondary-container text-on-secondary-container font-label-caps text-[11px]; }
+  .chip-warning { @apply px-3 py-1 rounded-full bg-accent-light text-[#9C6500] font-label-caps text-[11px]; }
+  .chip-error   { @apply px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-caps text-[11px]; }
+  .chip-neutral { @apply px-3 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[11px]; }
+  .input-field {
+    @apply w-full px-4 py-2.5 bg-white border border-outline-variant
+           focus:border-secondary focus:ring-1 focus:ring-secondary/30
+           rounded-lg font-body-sm text-body-sm text-on-surface
+           outline-none transition-all duration-200 placeholder:text-outline;
+  }
+  .input-mono {
+    @apply w-full px-4 py-2.5 bg-white border border-outline-variant
+           focus:border-secondary focus:ring-1 focus:ring-secondary/30
+           rounded-lg text-[14px] text-on-surface font-mono
+           outline-none transition-all duration-200 placeholder:text-outline;
+  }
+  .label-field { @apply block font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-wider; }
+  .nav-item { @apply flex items-center gap-3 text-on-primary/70 px-4 py-3 rounded-xl hover:bg-white/10 hover:text-white transition-all duration-150 cursor-pointer; }
+  .nav-item-active { @apply flex items-center gap-3 text-white border-l-4 border-secondary bg-white/10 px-4 py-3 rounded-r-xl; }
+  .drop-zone {
+    @apply border-2 border-dashed border-secondary/35 rounded-2xl p-8 text-center
+           transition-all duration-200 cursor-pointer hover:border-secondary hover:bg-secondary/5;
+  }
+  .fin-row   { @apply flex justify-between items-center py-3 border-b border-outline-variant/30 last:border-0; }
+  .fin-label { @apply font-body-sm text-on-surface; }
+  .fin-value { @apply font-mono text-[14px] text-on-surface text-right; }
+  .fin-total { @apply flex justify-between items-center py-3 font-semibold; }
+  details > summary { list-style: none; }
+  details > summary::-webkit-details-marker { display: none; }
+  .accordion-icon { transition: transform 0.2s ease; }
+  details[open] summary .accordion-icon { transform: rotate(180deg); }
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg,#002452 0%,#1b3a6b 50%,#00696d 100%);
+  background-size: 200% 200%;
+  animation: gshift 12s ease infinite;
+}
+@keyframes gshift {
+  0%{background-position:0% 50%} 50%{background-position:100% 50%} 100%{background-position:0% 50%}
+}
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-variation-settings: 'FILL' 0,'wght' 400;
+  line-height: 1;
+  vertical-align: middle;
+  user-select: none;
+}
+.icon-filled { font-variation-settings: 'FILL' 1,'wght' 400; }

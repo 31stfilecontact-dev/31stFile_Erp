@@ -1,0 +1,34 @@
+kind = "web"
+previewPath = "/"
+title = "31st File ERP"
+version = "1.0.0"
+id = "artifacts/erp"
+router = "path"
+
+[[integratedSkills]]
+name = "react-vite"
+version = "1.0.0"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 18996
+
+[services.development]
+run = "pnpm --filter @workspace/erp run dev"
+
+[services.production.build]
+args = ["pnpm", "--filter", "@workspace/erp", "run", "build"]
+
+[services.production.build.env]
+NODE_ENV = "production"
+
+[services.production.run]
+args = ["pnpm", "--filter", "@workspace/erp", "run", "start"]
+
+[services.production.run.env]
+PORT = "18996"
+NODE_ENV = "production"
+
+[services.env]
+PORT = "18996"

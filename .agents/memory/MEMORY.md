@@ -1,0 +1,1 @@
+- [ERP Next.js setup](erp-setup.md) — Next.js 14 app at artifacts/erp; uses standard pg driver (not Neon); schema seeded via SQL directly.
