@@ -11,6 +11,7 @@ const TABS = [
   {id:"accounts", label:"Accounts",  icon:"account_tree"},
   {id:"upi",      label:"UPI Rules", icon:"phone_iphone"},
   {id:"export",   label:"Export",    icon:"download"},
+  {id:"security", label:"Security",  icon:"lock"},
 ];
 
 export default function SettingsPage() {
@@ -25,9 +26,65 @@ export default function SettingsPage() {
     {keyword:"epfo",   account:"4102 — PF Contribution",  active:true},
   ]);
 
+  // Security tab state
+  const [pwForm, setPwForm] = useState({ current:"", next:"", confirm:"" });
+  const [pwLoading, setPwLoading] = useState(false);
+  const [pwMsg, setPwMsg]   = useState<{ok:boolean;text:string}|null>(null);
+  const [showPw, setShowPw] = useState({ current:false, next:false, confirm:false });
+
   function saveCompany() {
     setSaved(true);
     setTimeout(()=>setSaved(false),3000);
+  }
+
+  async function changePassword(e: React.FormEvent) {
+    e.preventDefault();
+    setPwMsg(null);
+    if (pwForm.next !== pwForm.confirm) {
+      setPwMsg({ ok:false, text:"New passwords do not match." }); return;
+    }
+    if (pwForm.next.length < 8) {
+      setPwMsg({ ok:false, text:"Password must be at least 8 characters." }); return;
+    }
+    setPwLoading(true);
+    try {
+      const res = await fetch("/api/auth/change-password", {
+        method:"PUT",
+        headers:{"Content-Type":"application/json"},
+        body: JSON.stringify({ currentPassword: pwForm.current, newPassword: pwForm.next }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setPwMsg({ ok:true, text:"Password changed successfully." });
+        setPwForm({ current:"", next:"", confirm:"" });
+      } else {
+        setPwMsg({ ok:false, text: data.error ?? "Failed to change password." });
+      }
+    } catch {
+      setPwMsg({ ok:false, text:"Network error. Please try again." });
+    } finally {
+      setPwLoading(false);
+    }
+  }
+
+  function PwInput({ field, label, placeholder }: { field: "current"|"next"|"confirm"; label:string; placeholder:string }) {
+    return (
+      <div>
+        <label className="label-field">{label}</label>
+        <div style={{position:"relative"}}>
+          <input type={showPw[field]?"text":"password"} required className="input-field"
+            style={{paddingRight:44}} placeholder={placeholder}
+            value={pwForm[field]}
+            onChange={e => setPwForm(p => ({...p, [field]: e.target.value}))}/>
+          <button type="button"
+            onClick={() => setShowPw(p => ({...p, [field]: !p[field]}))}
+            style={{position:"absolute",right:12,top:"50%",transform:"translateY(-50%)",
+              background:"none",border:"none",cursor:"pointer",color:"#747780",padding:0}}>
+            <Icon name={showPw[field]?"visibility_off":"visibility"} size={18} color="#747780"/>
+          </button>
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -179,6 +236,50 @@ export default function SettingsPage() {
                 Clear All Entries (This FY)
               </span>
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Security */}
+      {tab==="security"&&(
+        <div className="glass-card p-5 space-y-5">
+          <div>
+            <h2 style={{fontSize:16,fontWeight:700,color:"#131c2a",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+              Change Password
+            </h2>
+            <p style={{fontSize:13,color:"#44474f",marginTop:4,fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+              Use a strong password with letters, numbers, and symbols.
+            </p>
+          </div>
+
+          {pwMsg && (
+            <div style={{padding:"10px 14px",borderRadius:10,
+              background: pwMsg.ok ? "rgba(220,242,232,0.7)" : "rgba(255,218,214,0.7)",
+              borderLeft: `4px solid ${pwMsg.ok ? "#00696d" : "#ba1a1a"}`,
+              display:"flex",alignItems:"center",gap:8}}>
+              <Icon name={pwMsg.ok?"check_circle":"error"} size={18} color={pwMsg.ok?"#00696d":"#ba1a1a"}/>
+              <p style={{fontSize:13,color:pwMsg.ok?"#00696d":"#ba1a1a",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+                {pwMsg.text}
+              </p>
+            </div>
+          )}
+
+          <form onSubmit={changePassword} style={{display:"flex",flexDirection:"column",gap:16}}>
+            <PwInput field="current" label="Current Password" placeholder="Enter current password"/>
+            <PwInput field="next"    label="New Password"     placeholder="Min. 8 characters"/>
+            <PwInput field="confirm" label="Confirm New Password" placeholder="Repeat new password"/>
+            <button type="submit" disabled={pwLoading} className="btn-primary justify-center"
+              style={{opacity:pwLoading?0.8:1,cursor:pwLoading?"not-allowed":"pointer"}}>
+              {pwLoading
+                ? <><Icon name="autorenew" size={16}/> Saving…</>
+                : <><Icon name="lock_reset" size={16}/> Update Password</>}
+            </button>
+          </form>
+
+          <div style={{paddingTop:16,borderTop:"1px solid rgba(196,198,208,0.3)"}}>
+            <p style={{fontSize:12,color:"#747780",fontFamily:"'Plus Jakarta Sans',sans-serif"}}>
+              <Icon name="info" size={14} color="#747780"/> Sessions expire after 7 days of inactivity.
+            </p>
           </div>
         </div>
       )}

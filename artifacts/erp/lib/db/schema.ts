@@ -66,3 +66,15 @@ export const upiRules = pgTable("upi_rules",{
   accountId:uuid("account_id").references(()=>accounts.id),
   isActive:boolean("is_active").default(true),
 });
+
+export const users = pgTable("users",{
+  id:id(),
+  email:varchar("email",{length:255}).unique().notNull(),
+  passwordHash:varchar("password_hash",{length:255}).notNull(),
+  name:varchar("name",{length:100}).notNull(),
+  company:varchar("company",{length:100}),
+  role:varchar("role",{length:20}).default("admin"),
+  isActive:boolean("is_active").default(true),
+  createdAt:now(),
+  lastLoginAt:timestamp("last_login_at"),
+});

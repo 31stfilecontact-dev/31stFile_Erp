@@ -1,5 +1,6 @@
 "use client";
-import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 
 const LOGO_WHITE = "https://lottie.host/7e9f0f76-045f-4084-9d34-b576660d1848/vgHf4GtXbQ.png";
@@ -19,12 +20,14 @@ const NAV = [
 ];
 
 const BOTTOM_NAV = [
-  { href:"/dashboard",    icon:"home",       label:"Home"    },
-  { href:"/transactions", icon:"menu_book",  label:"Ledger"  },
-  { href:"/upi-capture",  icon:"phone_iphone",label:"UPI"    },
-  { href:"/pl-statement", icon:"assessment", label:"Reports" },
-  { href:"/settings",     icon:"person",     label:"Profile" },
+  { href:"/dashboard",    icon:"home",        label:"Home"    },
+  { href:"/transactions", icon:"menu_book",   label:"Ledger"  },
+  { href:"/upi-capture",  icon:"phone_iphone",label:"UPI"     },
+  { href:"/pl-statement", icon:"assessment",  label:"Reports" },
+  { href:"/settings",     icon:"person",      label:"Profile" },
 ];
+
+interface AppUser { name: string; company: string | null; initials: string; }
 
 function Icon({ name, filled=false, size=20 }: { name:string; filled?:boolean; size?:number }) {
   return (
@@ -36,9 +39,27 @@ function Icon({ name, filled=false, size=20 }: { name:string; filled?:boolean; s
 }
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
-  const path = usePathname();
+  const path   = usePathname();
+  const router = useRouter();
+  const [user, setUser] = useState<AppUser | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then(r => r.ok ? r.json() : null)
+      .then((u: { name: string; company: string | null } | null) => {
+        if (!u) { router.push("/login"); return; }
+        const initials = u.name.split(" ").map((w:string) => w[0]).join("").slice(0, 2).toUpperCase();
+        setUser({ name: u.name, company: u.company, initials });
+      });
+  }, []);
+
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
+    router.push("/login");
+  }
+
   const active = (href: string) =>
-    href === "/dashboard" ? path === href : path.startsWith(href);
+    path == null ? false : href === "/dashboard" ? path === href : path.startsWith(href);
 
   return (
     <div className="flex min-h-screen">
@@ -58,11 +79,11 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* Nav groups */}
         <nav className="flex-1 px-2 space-y-0.5 overflow-y-auto">
           {[
-            { label:"OVERVIEW",        items: NAV.slice(0,1) },
-            { label:"CAPTURE",         items: NAV.slice(1,3) },
-            { label:"ACCOUNTING",      items: NAV.slice(3,5) },
-            { label:"REPORTS",         items: NAV.slice(5,9) },
-            { label:"SETTINGS",        items: NAV.slice(9)   },
+            { label:"OVERVIEW",   items: NAV.slice(0,1) },
+            { label:"CAPTURE",    items: NAV.slice(1,3) },
+            { label:"ACCOUNTING", items: NAV.slice(3,5) },
+            { label:"REPORTS",    items: NAV.slice(5,9) },
+            { label:"SETTINGS",   items: NAV.slice(9)   },
           ].map(({ label, items }) => (
             <div key={label}>
               <p style={{ fontSize:9, letterSpacing:"1.8px", color:"rgba(137,165,221,0.5)",
@@ -93,13 +114,28 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         {/* User strip */}
         <div className="px-4 pt-4" style={{ borderTop:"1px solid rgba(255,255,255,0.10)" }}>
           <div className="flex items-center gap-3">
-            <div style={{ width:36, height:36, borderRadius:"50%", background:"#00696d",
+            <div style={{ width:36, height:36, borderRadius:"50%", background:"#00696d", flexShrink:0,
               display:"flex", alignItems:"center", justifyContent:"center",
-              color:"white", fontSize:13, fontWeight:700 }}>JD</div>
-            <div>
-              <p style={{ fontSize:13, fontWeight:600, color:"#fff", lineHeight:1.2 }}>John Doe</p>
-              <p style={{ fontSize:11, color:"rgba(137,165,221,0.65)", marginTop:2 }}>ACME Corp</p>
+              color:"white", fontSize:13, fontWeight:700 }}>
+              {user?.initials ?? "…"}
             </div>
+            <div style={{ flex:1, minWidth:0 }}>
+              <p style={{ fontSize:13, fontWeight:600, color:"#fff", lineHeight:1.2,
+                overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                {user?.name ?? "Loading…"}
+              </p>
+              <p style={{ fontSize:11, color:"rgba(137,165,221,0.65)", marginTop:2,
+                overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+                {user?.company ?? ""}
+              </p>
+            </div>
+            <button onClick={logout} title="Sign out"
+              style={{ background:"none", border:"none", cursor:"pointer", padding:4, borderRadius:8,
+                color:"rgba(137,165,221,0.7)", transition:"all 0.15s", flexShrink:0 }}
+              onMouseEnter={e=>(e.currentTarget.style.color="white")}
+              onMouseLeave={e=>(e.currentTarget.style.color="rgba(137,165,221,0.7)")}>
+              <Icon name="logout" size={18}/>
+            </button>
           </div>
         </div>
       </aside>
@@ -111,8 +147,8 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <Icon name="menu" size={24} />
         </button>
         <img src={LOGO_BLUE} alt="31st File" style={{ width:96 }} />
-        <button className="p-2 rounded-full hover:bg-primary/5 active:scale-95 transition-all">
-          <Icon name="notifications" size={24} />
+        <button onClick={logout} className="p-2 rounded-full hover:bg-primary/5 active:scale-95 transition-all">
+          <Icon name="logout" size={22} />
         </button>
       </header>
 
@@ -124,13 +160,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
           <div />
           <div className="flex items-center gap-3">
             <span className="chip-success">FY 2025-26</span>
-            <Link href="/journal-entry"
-              className="btn-primary text-[13px] px-4 py-2">
+            <Link href="/journal-entry" className="btn-primary text-[13px] px-4 py-2">
               <Icon name="add" size={16} /> New Entry
             </Link>
             <div style={{ width:36, height:36, borderRadius:"50%", background:"#1b3a6b",
               display:"flex", alignItems:"center", justifyContent:"center",
-              color:"white", fontSize:13, fontWeight:700, cursor:"pointer" }}>JD</div>
+              color:"white", fontSize:13, fontWeight:700, cursor:"pointer" }}
+              title={user?.name ?? ""}>
+              {user?.initials ?? "…"}
+            </div>
           </div>
         </div>
 

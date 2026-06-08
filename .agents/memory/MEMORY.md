@@ -1,1 +1,2 @@
 - [ERP Next.js setup](erp-setup.md) — Next.js 14 app at artifacts/erp; uses standard pg driver (not Neon); schema seeded via SQL directly.
+- [Next.js middleware Edge Runtime JWT](nextjs-middleware-edge-runtime.md) — jose silently fails in Edge Runtime; use Web Crypto API instead.

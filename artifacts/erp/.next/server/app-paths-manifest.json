@@ -1,5 +1,6 @@
 {
-  "/api/reports/pl/route": "app/api/reports/pl/route.js",
-  "/api/entries/route": "app/api/entries/route.js",
+  "/api/auth/me/route": "app/api/auth/me/route.js",
+  "/login/page": "app/login/page.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
   "/(app)/dashboard/page": "app/(app)/dashboard/page.js"
 }

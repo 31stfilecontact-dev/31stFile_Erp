@@ -16,6 +16,7 @@
     "react-dom": "^18",
     "drizzle-orm": "catalog:",
     "@neondatabase/serverless": "^0.10.0",
+    "jose": "^5.0.0",
     "bcryptjs": "^2.4.3",
     "papaparse": "^5.4.1",
     "date-fns": "^3.6.0",
