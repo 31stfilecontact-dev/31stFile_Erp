@@ -3,6 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { inr, fmtDate, fyDates } from "@/lib/utils/format";
+import VoucherModal from "@/components/VoucherModal";
 
 function Icon({ name, size=20, color="" }: { name:string; size?:number; color?:string }) {
   return (
@@ -43,6 +44,7 @@ export default function LedgerPage() {
   const [data,    setData]    = useState<LedgerData|null>(null);
   const [loading, setLoading] = useState(true);
   const [error,   setError]   = useState("");
+  const [voucherId, setVoucherId] = useState<string|null>(null);
 
   const load = useCallback(async (f: string, t: string) => {
     setLoading(true); setError("");
@@ -278,7 +280,9 @@ export default function LedgerPage() {
                     padding:"11px 16px", gap:8,
                     borderBottom:"1px solid rgba(196,198,208,0.18)",
                     background: i%2===0 ? "transparent" : "rgba(240,243,255,0.28)",
-                    transition:"background 0.12s", cursor:"default" }}
+                    transition:"background 0.12s", cursor:"pointer" }}
+                  onClick={() => setVoucherId(l.entryId)}
+                  title="Click to view full voucher"
                   onMouseEnter={e => (e.currentTarget.style.background="rgba(231,238,255,0.6)")}
                   onMouseLeave={e => (e.currentTarget.style.background=i%2===0?"transparent":"rgba(240,243,255,0.28)")}>
                   <span style={{ fontSize:12, color:"#44474f",
@@ -369,6 +373,8 @@ export default function LedgerPage() {
         }
         .print-only { display: none; }
       `}</style>
+
+      <VoucherModal entryId={voucherId} onClose={() => setVoucherId(null)} />
     </div>
   );
 }

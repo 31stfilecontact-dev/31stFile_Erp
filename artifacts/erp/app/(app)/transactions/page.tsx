@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { fmtDate, inr } from "@/lib/utils/format";
 import Link from "next/link";
+import VoucherModal from "@/components/VoucherModal";
 
 function Icon({ name, size=20, color="" }: { name:string;size?:number;color?:string }) {
   return <span className="material-symbols-outlined select-none"
@@ -16,6 +17,7 @@ export default function TransactionsPage() {
   const [filter, setFilter] = useState("ALL");
   const [expanded, setExpanded] = useState<string|null>(null);
   const [loading, setLoading] = useState(true);
+  const [voucherId, setVoucherId] = useState<string|null>(null);
 
   useEffect(()=>{
     fetch("/api/entries").then(r=>r.json())
@@ -166,7 +168,8 @@ export default function TransactionsPage() {
                     )}
                   </div>
                   <div style={{display:"flex",gap:8}}>
-                    <button className="btn-outline" style={{fontSize:12,padding:"6px 14px"}}>
+                    <button className="btn-outline" style={{fontSize:12,padding:"6px 14px"}}
+                      onClick={()=>setVoucherId(e.id)}>
                       <Icon name="visibility" size={14}/> Details
                     </button>
                     <button style={{fontSize:12,padding:"6px 14px",borderRadius:9999,cursor:"pointer",
@@ -181,6 +184,8 @@ export default function TransactionsPage() {
           ))
         )}
       </div>
+
+      <VoucherModal entryId={voucherId} onClose={() => setVoucherId(null)} />
     </div>
   );
 }

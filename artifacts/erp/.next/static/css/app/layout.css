@@ -824,6 +824,9 @@ details > summary::-webkit-details-marker { display: none; }
 .block{
   display: block;
 }
+.inline-block{
+  display: inline-block;
+}
 .flex{
   display: flex;
 }

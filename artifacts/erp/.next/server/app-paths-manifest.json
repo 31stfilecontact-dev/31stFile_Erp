@@ -1,4 +1,6 @@
 {
-  "/api/accounts/[id]/ledger/route": "app/api/accounts/[id]/ledger/route.js",
-  "/login/page": "app/login/page.js"
+  "/login/page": "app/login/page.js",
+  "/api/entries/[id]/route": "app/api/entries/[id]/route.js",
+  "/api/auth/login/route": "app/api/auth/login/route.js",
+  "/api/entries/route": "app/api/entries/route.js"
 }

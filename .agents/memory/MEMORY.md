@@ -1,2 +1,4 @@
-- [ERP Next.js setup](erp-setup.md) — Next.js 14 app at artifacts/erp; uses standard pg driver (not Neon); schema seeded via SQL directly.
-- [Next.js middleware Edge Runtime JWT](nextjs-middleware-edge-runtime.md) — jose silently fails in Edge Runtime; use Web Crypto API instead.
+- [ERP Auth & Middleware](erp-auth.md) — Web Crypto JWT in middleware (never jose there); jose only in server routes
+- [ERP Ledger API](erp-ledger-api.md) — Ledger route accepts code OR UUID; detects via regex before querying
+- [ERP P&L date range](erp-pl-dates.md) — P&L accepts explicit from/to params; ytd auto-calculates current FY
+- [ERP component pattern](erp-component-pattern.md) — Shared components in artifacts/erp/components/; VoucherModal reused across Ledger + Transactions
