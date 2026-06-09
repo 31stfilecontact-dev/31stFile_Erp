@@ -206,6 +206,16 @@ export default function AccountsPage() {
                           fontFamily:"'Plus Jakarta Sans',sans-serif",
                           background:a.normalBal==="DR"?"rgba(157,240,244,0.3)":"rgba(255,243,214,0.6)",
                           color:a.normalBal==="DR"?"#037074":"#9C6500"}}>{a.normalBal}</span>
+                        <Link href={`/ledger/${a.code}`}
+                          style={{background:"none",border:"none",cursor:"pointer",
+                            color:"#c4c6d0",padding:"4px 6px",borderRadius:6,
+                            textDecoration:"none",display:"inline-flex",alignItems:"center",
+                            transition:"color 0.15s"}}
+                          title="View Ledger"
+                          onMouseEnter={e=>(e.currentTarget.style.color=GROUP_COLORS[a.group]||"#747780")}
+                          onMouseLeave={e=>(e.currentTarget.style.color="#c4c6d0")}>
+                          <Icon name="menu_book" size={16}/>
+                        </Link>
                         <button style={{background:"none",border:"none",cursor:"pointer",
                           color:"#c4c6d0",padding:4,borderRadius:6,transition:"color 0.15s"}}
                           onMouseEnter={e=>(e.currentTarget.style.color="#747780")}

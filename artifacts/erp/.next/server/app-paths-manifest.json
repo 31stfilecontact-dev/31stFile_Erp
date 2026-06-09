@@ -1,6 +1,4 @@
 {
-  "/api/reports/trial-balance/route": "app/api/reports/trial-balance/route.js",
-  "/api/reports/pl/route": "app/api/reports/pl/route.js",
-  "/api/reports/balance-sheet/route": "app/api/reports/balance-sheet/route.js",
-  "/api/entries/route": "app/api/entries/route.js"
+  "/api/accounts/[id]/ledger/route": "app/api/accounts/[id]/ledger/route.js",
+  "/login/page": "app/login/page.js"
 }

@@ -12,6 +12,7 @@ const NAV = [
   { href:"/journal-entry",  icon:"edit_note",       label:"New Entry"     },
   { href:"/transactions",   icon:"receipt_long",    label:"Transactions"  },
   { href:"/accounts",       icon:"account_tree",    label:"Accounts"      },
+  { href:"/ledger",         icon:"menu_book",       label:"Ledger"        },
   { href:"/trial-balance",  icon:"balance",         label:"Trial Balance" },
   { href:"/pl-statement",   icon:"trending_up",     label:"P&L"           },
   { href:"/balance-sheet",  icon:"account_balance", label:"Balance Sheet" },
@@ -28,11 +29,11 @@ const BOTTOM_NAV = [
 ];
 
 const NAV_GROUPS = [
-  { label:"OVERVIEW",   items: NAV.slice(0,1) },
-  { label:"CAPTURE",    items: NAV.slice(1,3) },
-  { label:"ACCOUNTING", items: NAV.slice(3,5) },
-  { label:"REPORTS",    items: NAV.slice(5,9) },
-  { label:"SETTINGS",   items: NAV.slice(9)   },
+  { label:"OVERVIEW",   items: NAV.slice(0,1)  },
+  { label:"CAPTURE",    items: NAV.slice(1,3)  },
+  { label:"ACCOUNTING", items: NAV.slice(3,6)  },
+  { label:"REPORTS",    items: NAV.slice(6,9)  },
+  { label:"SETTINGS",   items: NAV.slice(9)    },
 ];
 
 interface AppUser { name: string; company: string | null; initials: string; }
