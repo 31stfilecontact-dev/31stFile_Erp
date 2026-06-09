@@ -6,8 +6,6 @@ const nextConfig = {
       { protocol: "https", hostname: "**" },
     ],
   },
-  experimental: {
-    serverComponentsExternalPackages: ["@neondatabase/serverless"],
-  },
+  serverExternalPackages: ["@neondatabase/serverless"],
 };
 module.exports = nextConfig;

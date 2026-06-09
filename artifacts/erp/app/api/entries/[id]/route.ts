@@ -5,10 +5,11 @@ import { eq } from "drizzle-orm";
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
+  const { id } = await params;
   const [entry] = await db.select().from(entries)
-    .where(eq(entries.id, params.id)).limit(1);
+    .where(eq(entries.id, id)).limit(1);
 
   if (!entry) return NextResponse.json({ error: "Entry not found" }, { status: 404 });
 
@@ -25,7 +26,7 @@ export async function GET(
     })
     .from(entryLines)
     .innerJoin(accounts, eq(accounts.id, entryLines.accountId))
-    .where(eq(entryLines.entryId, params.id));
+    .where(eq(entryLines.entryId, id));
 
   const totalDr = lines.filter(l => l.side === "DR").reduce((s, l) => s + parseFloat(l.amount), 0);
   const totalCr = lines.filter(l => l.side === "CR").reduce((s, l) => s + parseFloat(l.amount), 0);

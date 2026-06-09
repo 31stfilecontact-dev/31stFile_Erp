@@ -5,18 +5,19 @@ import { eq, and, lte, gte, asc, sum } from "drizzle-orm";
 
 export async function GET(
   req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { searchParams } = new URL(req.url);
   const from = searchParams.get("from");
   const to   = searchParams.get("to");
+  const { id } = await params;
 
   // Detect UUID vs account code
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-  const isUuid  = UUID_RE.test(params.id);
+  const isUuid  = UUID_RE.test(id);
 
   const [acct] = await db.select().from(accounts)
-    .where(isUuid ? eq(accounts.id, params.id) : eq(accounts.code, params.id))
+    .where(isUuid ? eq(accounts.id, id) : eq(accounts.code, id))
     .limit(1);
 
   if (!acct) return NextResponse.json({ error: "Account not found" }, { status: 404 });

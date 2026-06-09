@@ -1,11 +1,11 @@
 "use client";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { inr, inrAbbr, fmtDate } from "@/lib/utils/format";
 
-function Icon({ name, size=22, filled=false, color="" }: { name:string;size?:number;filled?:boolean;color?:string }) {
+function Icon({ name, size=22, filled=false, color="", style }: { name:string;size?:number;filled?:boolean;color?:string;style?:CSSProperties }) {
   return <span className="material-symbols-outlined select-none"
-    style={{fontSize:size,lineHeight:1,fontVariationSettings:filled?"'FILL' 1":"'FILL' 0",color:color||"inherit"}}>{name}</span>;
+    style={{fontSize:size,lineHeight:1,fontVariationSettings:filled?"'FILL' 1":"'FILL' 0",color:color||"inherit",...style}}>{name}</span>;
 }
 
 export default function DashboardPage() {

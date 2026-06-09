@@ -4,6 +4,7 @@ export interface UPITxn {
   upiId: string; utr: string; amount: number;
   type: "DEBIT"|"CREDIT"; source: "CSV"|"SMS"|"MANUAL";
   matchStatus: "MATCHED"|"UNMATCHED";
+  ledgerAccount?: string;
 }
 export async function parseUPICSV(file: File): Promise<UPITxn[]> {
   return new Promise(resolve => {

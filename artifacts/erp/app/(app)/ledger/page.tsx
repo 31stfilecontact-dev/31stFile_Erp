@@ -1,11 +1,11 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useRouter } from "next/navigation";
 
-function Icon({ name, size=20, color="" }: { name:string; size?:number; color?:string }) {
+function Icon({ name, size=20, color="", style }: { name:string; size?:number; color?:string; style?:CSSProperties }) {
   return (
     <span className="material-symbols-outlined select-none"
-      style={{ fontSize:size, lineHeight:1, color:color||"inherit" }}>
+      style={{ fontSize:size, lineHeight:1, color:color||"inherit", ...style }}>
       {name}
     </span>
   );

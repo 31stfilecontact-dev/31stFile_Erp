@@ -1,12 +1,12 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { fmtDate, inr } from "@/lib/utils/format";
 import Link from "next/link";
 import VoucherModal from "@/components/VoucherModal";
 
-function Icon({ name, size=20, color="" }: { name:string;size?:number;color?:string }) {
+function Icon({ name, size=20, color="", style }: { name:string;size?:number;color?:string;style?:CSSProperties }) {
   return <span className="material-symbols-outlined select-none"
-    style={{fontSize:size,lineHeight:1,color:color||"inherit"}}>{name}</span>;
+    style={{fontSize:size,lineHeight:1,color:color||"inherit",...style}}>{name}</span>;
 }
 
 const TYPES = ["ALL","PAYMENT","RECEIPT","JOURNAL","SALES","PURCHASE"];

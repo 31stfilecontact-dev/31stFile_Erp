@@ -1,10 +1,10 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { inr } from "@/lib/utils/format";
 
-function Icon({ name, size=20, color="" }: { name:string;size?:number;color?:string }) {
+function Icon({ name, size=20, color="", style }: { name:string;size?:number;color?:string;style?:CSSProperties }) {
   return <span className="material-symbols-outlined select-none"
-    style={{fontSize:size,lineHeight:1,color:color||"inherit"}}>{name}</span>;
+    style={{fontSize:size,lineHeight:1,color:color||"inherit",...style}}>{name}</span>;
 }
 
 interface Line { accountCode:string; side:"DR"|"CR"; amount:number; note:string; }
