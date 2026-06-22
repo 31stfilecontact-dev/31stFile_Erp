@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { accounts, entries, entryLines } from "@workspace/db";
 import { eq, and, lte, gte, sql, asc, desc } from "drizzle-orm";
+import { requireAuth } from "./auth";
 
 const router = Router();
 
@@ -15,7 +16,7 @@ function parseFy(fy?: string): { from: string; to: string } {
   return { from: `${year}-04-01`, to: `${year + 1}-03-31` };
 }
 
-router.get("/reports/trial-balance", async (req, res) => {
+router.get("/reports/trial-balance", requireAuth, async (req, res) => {
   try {
     const asAt = (req.query.asAt as string) || new Date().toISOString().split("T")[0];
     const accts = await db.select().from(accounts).orderBy(asc(accounts.group), asc(accounts.code));
@@ -50,7 +51,7 @@ router.get("/reports/trial-balance", async (req, res) => {
   }
 });
 
-router.get("/reports/pl", async (req, res) => {
+router.get("/reports/pl", requireAuth, async (req, res) => {
   try {
     const period = req.query.period as string || "ytd";
     const fy = parseFy(req.query.fy as string);
@@ -117,7 +118,7 @@ async function computeNetProfit(from: string, to: string): Promise<number> {
   return incBals.reduce((s, b) => s + b, 0) - expBals.reduce((s, b) => s + b, 0);
 }
 
-router.get("/reports/balance-sheet", async (req, res) => {
+router.get("/reports/balance-sheet", requireAuth, async (req, res) => {
   try {
     const asAt = (req.query.asAt as string) || new Date().toISOString().split("T")[0];
     const fy = parseFy(req.query.fy as string);
@@ -150,13 +151,7 @@ router.get("/reports/balance-sheet", async (req, res) => {
     const currentLiabAccts = liabilityAccts.filter(a => !a.subGroup || a.subGroup === "Current Liabilities" || a.subGroup === "Equity");
     const nonCurrentLiabAccts = liabilityAccts.filter(a => a.subGroup === "Non-Current");
 
-    const [
-      currentAssetBalances,
-      nonCurrentAssetBalances,
-      currentLiabBalances,
-      nonCurrentLiabBalances,
-      equityBalances,
-    ] = await Promise.all([
+    const [currentAssetBalances, nonCurrentAssetBalances, currentLiabBalances, nonCurrentLiabBalances, equityBalances] = await Promise.all([
       Promise.all(currentAssetAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc, undefined, asAt) }))),
       Promise.all(nonCurrentAssetAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc, undefined, asAt) }))),
       Promise.all(currentLiabAccts.map(async acc => getBalance(acc, undefined, asAt))),
@@ -176,8 +171,7 @@ router.get("/reports/balance-sheet", async (req, res) => {
     const totalEquityLiabilities = totalEquity + totalCurrentLiabilities + totalNonCurrentLiabilities;
 
     res.json({
-      totalAssets,
-      totalEquityLiabilities,
+      totalAssets, totalEquityLiabilities,
       balanced: Math.abs(totalAssets - totalEquityLiabilities) < 1,
       equity: { capital: capitalEquity, netProfit, drawings: 0, total: totalEquity },
       currentLiabilities: totalCurrentLiabilities,
@@ -185,7 +179,7 @@ router.get("/reports/balance-sheet", async (req, res) => {
       currentAssets: currentAssetBalances.filter(b => b.amount !== 0),
       nonCurrentAssets: nonCurrentAssetBalances.filter(b => b.amount !== 0),
       breakdown: [...currentAssetBalances, ...nonCurrentAssetBalances].filter(b => b.amount !== 0),
-      fy: fy,
+      fy,
     });
   } catch (err) {
     console.error(err);
@@ -193,7 +187,7 @@ router.get("/reports/balance-sheet", async (req, res) => {
   }
 });
 
-router.get("/reports/dashboard", async (_req, res) => {
+router.get("/reports/dashboard", requireAuth, async (_req, res) => {
   try {
     const accts = await db.select().from(accounts);
     const recentEntries = await db.select().from(entries).orderBy(desc(entries.entryDate), desc(entries.createdAt)).limit(5);
@@ -215,7 +209,6 @@ router.get("/reports/dashboard", async (_req, res) => {
     const now = new Date();
     const monthFrom = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
     const monthTo = now.toISOString().split("T")[0];
-
     const incomeAccts = accts.filter(a => a.group === "Income");
     const expenseAccts = accts.filter(a => a.group === "Expenses");
 

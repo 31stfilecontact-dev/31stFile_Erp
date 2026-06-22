@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
 import { entries, entryLines, accounts } from "@workspace/db";
-import { eq, desc, sql, and, inArray } from "drizzle-orm";
+import { eq, desc, sql, and } from "drizzle-orm";
 import { randomUUID } from "crypto";
+import { requireAuth } from "./auth";
 
 const router = Router();
 
@@ -21,25 +22,16 @@ async function getNextVoucherNo(voucherType: string, dateStr?: string): Promise<
   return `${prefix}-${tag}-${num}`;
 }
 
-router.get("/entries", async (_req, res) => {
+router.get("/entries", requireAuth, async (_req, res) => {
   try {
     const rows = await db
       .select({
-        id: entries.id,
-        entryDate: entries.entryDate,
-        voucherNo: entries.voucherNo,
-        voucherType: entries.voucherType,
-        narration: entries.narration,
-        reference: entries.reference,
-        status: entries.status,
-        createdAt: entries.createdAt,
-        lineId: entryLines.id,
-        lineSide: entryLines.side,
-        lineAmount: entryLines.amount,
-        lineNote: entryLines.note,
-        lineAccountId: accounts.id,
-        lineAccountCode: accounts.code,
-        lineAccountName: accounts.name,
+        id: entries.id, entryDate: entries.entryDate, voucherNo: entries.voucherNo,
+        voucherType: entries.voucherType, narration: entries.narration,
+        reference: entries.reference, status: entries.status, createdAt: entries.createdAt,
+        lineId: entryLines.id, lineSide: entryLines.side, lineAmount: entryLines.amount,
+        lineNote: entryLines.note, lineAccountId: accounts.id,
+        lineAccountCode: accounts.code, lineAccountName: accounts.name,
       })
       .from(entries)
       .leftJoin(entryLines, eq(entryLines.entryId, entries.id))
@@ -52,8 +44,7 @@ router.get("/entries", async (_req, res) => {
         entryMap.set(row.id, {
           id: row.id, entryDate: row.entryDate, voucherNo: row.voucherNo,
           voucherType: row.voucherType, narration: row.narration,
-          reference: row.reference, status: row.status, createdAt: row.createdAt,
-          lines: [],
+          reference: row.reference, status: row.status, createdAt: row.createdAt, lines: [],
         });
       }
       if (row.lineId) {
@@ -70,7 +61,7 @@ router.get("/entries", async (_req, res) => {
   }
 });
 
-router.get("/entries/:id", async (req, res) => {
+router.get("/entries/:id", requireAuth, async (req, res) => {
   try {
     const [entry] = await db.select().from(entries).where(eq(entries.id, req.params.id));
     if (!entry) return res.status(404).json({ error: "Entry not found" });
@@ -92,10 +83,9 @@ router.get("/entries/:id", async (req, res) => {
   }
 });
 
-router.post("/entries", async (req, res) => {
+router.post("/entries", requireAuth, async (req, res) => {
   try {
     const { entryDate, voucherType, narration, reference, lines } = req.body;
-
     if (!entryDate || !narration || !lines?.length) {
       return res.status(400).json({ error: "entryDate, narration, lines required" });
     }
@@ -142,7 +132,7 @@ router.post("/entries", async (req, res) => {
   }
 });
 
-router.post("/entries/upi-batch", async (req, res) => {
+router.post("/entries/upi-batch", requireAuth, async (req, res) => {
   const { transactions } = req.body;
   if (!Array.isArray(transactions)) return res.status(400).json({ error: "transactions array required" });
 
