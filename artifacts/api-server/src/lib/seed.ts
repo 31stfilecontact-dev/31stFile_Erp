@@ -26,19 +26,31 @@ const DEFAULT_ACCOUNTS = [
 
 export async function seedIfNeeded() {
   try {
+    // Seed admin user only if no users exist AND ADMIN_EMAIL + ADMIN_PASSWORD are set
     const existingUsers = await db.select().from(users).limit(1);
     if (existingUsers.length === 0) {
-      const hash = await bcrypt.hash("admin123", 12);
-      await db.insert(users).values({
-        id: randomUUID(),
-        email: "admin@31stfile.com",
-        name: "Admin",
-        passwordHash: hash,
-        role: "admin",
-      }).onConflictDoNothing();
-      console.log("Seeded default admin user: admin@31stfile.com / admin123");
+      const adminEmail = process.env.ADMIN_EMAIL;
+      const adminPassword = process.env.ADMIN_PASSWORD;
+
+      if (adminEmail && adminPassword) {
+        const hash = await bcrypt.hash(adminPassword, 12);
+        await db.insert(users).values({
+          id: randomUUID(),
+          email: adminEmail.toLowerCase(),
+          name: "Admin",
+          passwordHash: hash,
+          role: "admin",
+        }).onConflictDoNothing();
+        console.log(`Seeded admin user: ${adminEmail}`);
+      } else {
+        console.warn(
+          "No users exist and ADMIN_EMAIL / ADMIN_PASSWORD are not set. " +
+          "Set both environment variables to create the initial admin account on first start."
+        );
+      }
     }
 
+    // Seed chart of accounts regardless
     const existingAccounts = await db.select().from(accounts).limit(1);
     if (existingAccounts.length === 0) {
       await db.insert(accounts).values(

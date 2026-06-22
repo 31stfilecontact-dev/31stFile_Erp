@@ -117,7 +117,7 @@ export default function LoginPage() {
         </form>
 
         <p style={{ textAlign: "center", fontSize: 12, color: "#747780", marginTop: 24, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-          Default: admin@31stfile.com / admin123
+          Contact your administrator for access
         </p>
       </div>
     </div>
