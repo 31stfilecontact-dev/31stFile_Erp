@@ -1,0 +1,1 @@
+- [ERP app setup](erp-setup.md) — 31st File ERP: ports, credentials, import paths, proxy config

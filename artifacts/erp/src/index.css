@@ -1,0 +1,229 @@
+@import "tailwindcss";
+
+/* ── Fonts ── */
+@layer base {
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: #f0f4f8;
+    color: #131c2a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+  }
+}
+
+/* ── Glass card ── */
+.glass-card {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(196, 198, 208, 0.35);
+  border-radius: 16px;
+  box-shadow: 0 2px 16px rgba(0, 36, 82, 0.06), 0 1px 3px rgba(0, 36, 82, 0.04);
+  backdrop-filter: blur(12px);
+}
+
+.glass-card-sm {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(196, 198, 208, 0.35);
+  border-radius: 12px;
+  box-shadow: 0 1px 6px rgba(0, 36, 82, 0.06);
+}
+
+/* ── Buttons ── */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  text-decoration: none;
+  background: linear-gradient(135deg, #002452 0%, #00696d 100%);
+  color: white;
+  transition: opacity 0.15s, transform 0.1s;
+  white-space: nowrap;
+}
+.btn-primary:hover { opacity: 0.9; }
+.btn-primary:active { transform: scale(0.98); }
+.btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  border: 1.5px solid rgba(196, 198, 208, 0.7);
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  background: white;
+  color: #131c2a;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-outline:hover { background: #f0f3ff; border-color: #00696d; color: #00696d; }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 14px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  background: transparent;
+  color: #44474f;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.btn-ghost:hover { background: rgba(196, 198, 208, 0.25); }
+
+/* ── Form fields ── */
+.label-field {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  color: #44474f;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  margin-bottom: 5px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #c4c6d0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  color: #131c2a;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-field:focus {
+  border-color: #00696d;
+  box-shadow: 0 0 0 3px rgba(0, 105, 109, 0.12);
+}
+.input-field::placeholder { color: #b0b3bf; }
+
+.input-mono {
+  width: 100%;
+  padding: 10px 13px;
+  border: 1.5px solid #c4c6d0;
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', monospace;
+  color: #131c2a;
+  background: white;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-mono:focus {
+  border-color: #00696d;
+  box-shadow: 0 0 0 3px rgba(0, 105, 109, 0.12);
+}
+.input-mono::placeholder { color: #b0b3bf; }
+
+select.input-field, select.input-mono {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23747780' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 38px;
+  cursor: pointer;
+}
+
+/* ── Chips ── */
+.chip-neutral {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: rgba(196, 198, 208, 0.35);
+  color: #44474f;
+}
+.chip-success {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: rgba(157, 240, 244, 0.45);
+  color: #037074;
+}
+
+/* ── Financial rows ── */
+.fin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(196, 198, 208, 0.2);
+}
+.fin-label {
+  font-size: 13px;
+  color: #44474f;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
+.fin-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  color: #00696d;
+}
+
+/* ── Space utilities ── */
+.space-y-4 > * + * { margin-top: 16px; }
+.space-y-5 > * + * { margin-top: 20px; }
+.space-y-6 > * + * { margin-top: 24px; }
+.space-y-3 > * + * { margin-top: 12px; }
+.p-4 { padding: 16px; }
+.p-5 { padding: 20px; }
+.p-6 { padding: 24px; }
+.p-3 { padding: 12px; }
+.p-12 { padding: 48px; }
+.w-full { width: 100%; }
+.flex { display: flex; }
+.justify-center { justify-content: center; }
+.text-center { text-align: center; }
+.overflow-hidden { overflow: hidden; }
+
+/* ── Print ── */
+@media print {
+  aside, .no-print { display: none !important; }
+  main { margin: 0 !important; padding: 0 !important; }
+  .glass-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+  .print-only { display: block !important; }
+}
+.print-only { display: none; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(196, 198, 208, 0.6); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(196, 198, 208, 0.9); }
