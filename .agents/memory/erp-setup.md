@@ -21,3 +21,18 @@ description: Key decisions and quirks for the 31st File ERP migration into the R
 - JWT via `jose` stored in httpOnly cookies (`token` cookie).
 - bcryptjs for password hashing.
 - Seed creates admin user + default chart of accounts (1001=Cash, 1002=Bank, 4999=Miscellaneous).
+
+## Voucher number format
+- Dynamic fyTag from entryDate: month >= 4 → startYr = year, else startYr = year-1.
+- Format: `${prefix}-${fyTag}-${count}` e.g. `PAY-2627-0001`.
+
+## UPI staging flow
+- Parse SMS/CSV → staged locally with StagedTxn (extends UPITxn + accountId, selected flag).
+- Auto-rules: `GET/POST/DELETE /api/upi/rules` — keyword (lowercase contains match) → accountId.
+- Posting: `POST /api/entries/upi-batch` with selected txns that have accountId set.
+- DEBIT: DR ledgerAccount, CR Bank (1002). CREDIT: DR Bank (1002), CR ledgerAccount.
+
+## P&L fiscal year param
+- `GET /api/reports/pl?fy=YYYY-YY&period=ytd` — parses to from/to dates.
+- `GET /api/reports/balance-sheet?fy=YYYY-YY` — uses fy-scoped net profit in equity section.
+- Default: current FY (April 1 of current year to March 31 next year).

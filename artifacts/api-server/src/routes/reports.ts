@@ -5,7 +5,11 @@ import { eq, and, lte, gte, sql, asc, desc } from "drizzle-orm";
 
 const router = Router();
 
-function fyDates() {
+function parseFy(fy?: string): { from: string; to: string } {
+  if (fy && /^\d{4}-\d{2}$/.test(fy)) {
+    const startYr = parseInt(fy.slice(0, 4));
+    return { from: `${startYr}-04-01`, to: `${startYr + 1}-03-31` };
+  }
   const now = new Date();
   const year = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
   return { from: `${year}-04-01`, to: `${year + 1}-03-31` };
@@ -14,7 +18,6 @@ function fyDates() {
 router.get("/reports/trial-balance", async (req, res) => {
   try {
     const asAt = (req.query.asAt as string) || new Date().toISOString().split("T")[0];
-
     const accts = await db.select().from(accounts).orderBy(asc(accounts.group), asc(accounts.code));
 
     const rows = await Promise.all(accts.map(async (acc) => {
@@ -30,10 +33,9 @@ router.get("/reports/trial-balance", async (req, res) => {
         if (acc.normalBal === "DR") net += l.side === "DR" ? amt : -amt;
         else net += l.side === "CR" ? amt : -amt;
       }
-
       return {
-        accountId: acc.id, code: acc.code, name: acc.name, group: acc.group,
-        subGroup: acc.subGroup, normalBal: acc.normalBal,
+        accountId: acc.id, code: acc.code, name: acc.name,
+        group: acc.group, subGroup: acc.subGroup, normalBal: acc.normalBal,
         dr: acc.normalBal === "DR" && net > 0 ? net : (acc.normalBal === "CR" && net < 0 ? Math.abs(net) : 0),
         cr: acc.normalBal === "CR" && net > 0 ? net : (acc.normalBal === "DR" && net < 0 ? Math.abs(net) : 0),
       };
@@ -41,7 +43,6 @@ router.get("/reports/trial-balance", async (req, res) => {
 
     const totalDr = rows.reduce((s, r) => s + r.dr, 0);
     const totalCr = rows.reduce((s, r) => s + r.cr, 0);
-
     res.json({ rows, totalDr, totalCr, balanced: Math.abs(totalDr - totalCr) < 0.01 });
   } catch (err) {
     console.error(err);
@@ -52,7 +53,7 @@ router.get("/reports/trial-balance", async (req, res) => {
 router.get("/reports/pl", async (req, res) => {
   try {
     const period = req.query.period as string || "ytd";
-    const fy = fyDates();
+    const fy = parseFy(req.query.fy as string);
     let from = fy.from;
     let to = fy.to;
 
@@ -80,29 +81,52 @@ router.get("/reports/pl", async (req, res) => {
       return net;
     }
 
-    const income = await Promise.all(incomeAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc) })));
-    const expenses = await Promise.all(expenseAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc) })));
+    const income = await Promise.all(incomeAccts.map(async acc => ({ name: acc.name, code: acc.code, amount: await getBalance(acc) })));
+    const expenses = await Promise.all(expenseAccts.map(async acc => ({ name: acc.name, code: acc.code, amount: await getBalance(acc) })));
 
     const grossIncome = income.reduce((s, i) => s + i.amount, 0);
     const totalExpenses = expenses.reduce((s, e) => s + e.amount, 0);
-
-    res.json({ income, expenses, grossIncome, totalExpenses, netProfit: grossIncome - totalExpenses, from, to });
+    res.json({ income, expenses, grossIncome, totalExpenses, netProfit: grossIncome - totalExpenses, from, to, fy: req.query.fy || null });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to compute P&L" });
   }
 });
 
+async function computeNetProfit(from: string, to: string): Promise<number> {
+  const incomeAccts = await db.select().from(accounts).where(eq(accounts.group, "Income"));
+  const expenseAccts = await db.select().from(accounts).where(eq(accounts.group, "Expenses"));
+
+  async function getBal(acc: typeof accounts.$inferSelect) {
+    const lines = await db
+      .select({ side: entryLines.side, amount: entryLines.amount })
+      .from(entryLines)
+      .innerJoin(entries, eq(entryLines.entryId, entries.id))
+      .where(and(eq(entryLines.accountId, acc.id), gte(entries.entryDate, from), lte(entries.entryDate, to)));
+    let net = 0;
+    for (const l of lines) {
+      const amt = parseFloat(l.amount as string);
+      if (acc.normalBal === "DR") net += l.side === "DR" ? amt : -amt;
+      else net += l.side === "CR" ? amt : -amt;
+    }
+    return net;
+  }
+
+  const incBals = await Promise.all(incomeAccts.map(getBal));
+  const expBals = await Promise.all(expenseAccts.map(getBal));
+  return incBals.reduce((s, b) => s + b, 0) - expBals.reduce((s, b) => s + b, 0);
+}
+
 router.get("/reports/balance-sheet", async (req, res) => {
   try {
     const asAt = (req.query.asAt as string) || new Date().toISOString().split("T")[0];
-    const fy = fyDates();
-
+    const fy = parseFy(req.query.fy as string);
     const accts = await db.select().from(accounts).orderBy(asc(accounts.code));
 
-    async function getBalance(acc: typeof accounts.$inferSelect, limitTo?: string) {
-      const conds = [eq(entryLines.accountId, acc.id)];
-      if (limitTo) conds.push(lte(entries.entryDate, limitTo));
+    async function getBalance(acc: typeof accounts.$inferSelect, from?: string, to?: string) {
+      const conds: any[] = [eq(entryLines.accountId, acc.id)];
+      if (from) conds.push(gte(entries.entryDate, from));
+      if (to) conds.push(lte(entries.entryDate, to));
       const lines = await db
         .select({ side: entryLines.side, amount: entryLines.amount })
         .from(entryLines)
@@ -120,30 +144,48 @@ router.get("/reports/balance-sheet", async (req, res) => {
     const assetAccts = accts.filter(a => a.group === "Assets");
     const liabilityAccts = accts.filter(a => a.group === "Liabilities");
     const equityAccts = accts.filter(a => a.group === "Equity");
-    const incomeAccts = accts.filter(a => a.group === "Income");
-    const expenseAccts = accts.filter(a => a.group === "Expenses");
 
-    const assetBalances = await Promise.all(assetAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc, asAt) })));
-    const liabilityBalances = await Promise.all(liabilityAccts.map(async acc => getBalance(acc, asAt)));
-    const equityBalances = await Promise.all(equityAccts.map(async acc => getBalance(acc, asAt)));
-    const incomeBalances = await Promise.all(incomeAccts.map(async acc => getBalance(acc)));
-    const expenseBalances = await Promise.all(expenseAccts.map(async acc => getBalance(acc)));
+    const currentAssetAccts = assetAccts.filter(a => !a.subGroup || a.subGroup === "Current Assets");
+    const nonCurrentAssetAccts = assetAccts.filter(a => a.subGroup === "Non-Current Assets");
+    const currentLiabAccts = liabilityAccts.filter(a => !a.subGroup || a.subGroup === "Current Liabilities" || a.subGroup === "Equity");
+    const nonCurrentLiabAccts = liabilityAccts.filter(a => a.subGroup === "Non-Current");
 
-    const totalAssets = assetBalances.reduce((s, b) => s + b.amount, 0);
-    const totalLiabilities = liabilityBalances.reduce((s, b) => s + b, 0);
+    const [
+      currentAssetBalances,
+      nonCurrentAssetBalances,
+      currentLiabBalances,
+      nonCurrentLiabBalances,
+      equityBalances,
+    ] = await Promise.all([
+      Promise.all(currentAssetAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc, undefined, asAt) }))),
+      Promise.all(nonCurrentAssetAccts.map(async acc => ({ name: acc.name, amount: await getBalance(acc, undefined, asAt) }))),
+      Promise.all(currentLiabAccts.map(async acc => getBalance(acc, undefined, asAt))),
+      Promise.all(nonCurrentLiabAccts.map(async acc => getBalance(acc, undefined, asAt))),
+      Promise.all(equityAccts.map(async acc => getBalance(acc, undefined, asAt))),
+    ]);
+
+    const netProfit = await computeNetProfit(fy.from, fy.to > asAt ? asAt : fy.to);
+
+    const totalCurrentAssets = currentAssetBalances.reduce((s, b) => s + b.amount, 0);
+    const totalNonCurrentAssets = nonCurrentAssetBalances.reduce((s, b) => s + b.amount, 0);
+    const totalAssets = totalCurrentAssets + totalNonCurrentAssets;
+    const totalCurrentLiabilities = currentLiabBalances.reduce((s, b) => s + b, 0);
+    const totalNonCurrentLiabilities = nonCurrentLiabBalances.reduce((s, b) => s + b, 0);
     const capitalEquity = equityBalances.reduce((s, b) => s + b, 0);
-    const netProfit = incomeBalances.reduce((s, b) => s + b, 0) - expenseBalances.reduce((s, b) => s + b, 0);
-
     const totalEquity = capitalEquity + netProfit;
-    const totalEquityLiabilities = totalEquity + totalLiabilities;
+    const totalEquityLiabilities = totalEquity + totalCurrentLiabilities + totalNonCurrentLiabilities;
 
     res.json({
       totalAssets,
       totalEquityLiabilities,
       balanced: Math.abs(totalAssets - totalEquityLiabilities) < 1,
       equity: { capital: capitalEquity, netProfit, drawings: 0, total: totalEquity },
-      currentLiabilities: totalLiabilities,
-      breakdown: assetBalances.filter(b => b.amount !== 0),
+      currentLiabilities: totalCurrentLiabilities,
+      nonCurrentLiabilities: totalNonCurrentLiabilities,
+      currentAssets: currentAssetBalances.filter(b => b.amount !== 0),
+      nonCurrentAssets: nonCurrentAssetBalances.filter(b => b.amount !== 0),
+      breakdown: [...currentAssetBalances, ...nonCurrentAssetBalances].filter(b => b.amount !== 0),
+      fy: fy,
     });
   } catch (err) {
     console.error(err);
@@ -201,11 +243,8 @@ router.get("/reports/dashboard", async (_req, res) => {
     res.json({
       totalEntries: Number(totalEntries[0]?.cnt ?? 0),
       totalAccounts: accts.length,
-      cashBalance,
-      bankBalance,
-      recentEntries,
-      thisMonthIncome,
-      thisMonthExpenses,
+      cashBalance, bankBalance, recentEntries,
+      thisMonthIncome, thisMonthExpenses,
     });
   } catch (err) {
     console.error(err);

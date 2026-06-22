@@ -11,16 +11,33 @@ function Icon({ name, size = 20, color = "" }: { name: string; size?: number; co
   );
 }
 
+function currentFy() {
+  const now = new Date();
+  const yr = now.getMonth() >= 3 ? now.getFullYear() : now.getFullYear() - 1;
+  return `${yr}-${String(yr + 1).slice(2)}`;
+}
+
+function fyOptions() {
+  const yr = new Date().getMonth() >= 3 ? new Date().getFullYear() : new Date().getFullYear() - 1;
+  return [yr - 2, yr - 1, yr, yr + 1].map(y => ({
+    value: `${y}-${String(y + 1).slice(2)}`,
+    label: `FY ${y}-${String(y + 1).slice(2)}`,
+  }));
+}
+
 export default function PLStatementPage() {
   const [period, setPeriod] = useState<"month" | "ytd">("ytd");
+  const [fy, setFy] = useState(currentFy());
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/reports/pl?period=${period}`)
+    const params = new URLSearchParams({ period });
+    if (period === "ytd") params.set("fy", fy);
+    fetch(`/api/reports/pl?${params}`)
       .then(r => r.json()).then(setData).finally(() => setLoading(false));
-  }, [period]);
+  }, [period, fy]);
 
   const pl = data || { income: [], expenses: [], grossIncome: 0, totalExpenses: 0, netProfit: 0 };
   const isProfit = pl.netProfit >= 0;
@@ -36,7 +53,7 @@ export default function PLStatementPage() {
             Profit &amp; Loss Statement
           </h1>
           <p style={{ fontSize: 12, color: "#747780", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            {data?.from && data?.to ? `${data.from} to ${data.to}` : "Current Financial Year"}
+            {data?.from && data?.to ? `${data.from} to ${data.to}` : "Loading…"}
           </p>
         </div>
         <button onClick={() => window.print()} style={{ padding: 8, borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "#747780" }}>
@@ -44,14 +61,21 @@ export default function PLStatementPage() {
         </button>
       </div>
 
-      {/* Period toggle */}
-      <div style={{ display: "flex", gap: 8 }}>
-        {([["month", "This Month"], ["ytd", "YTD"]] as const).map(([v, l]) => (
-          <button key={v} onClick={() => setPeriod(v)}
-            style={{ padding: "6px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s", background: period === v ? "#00696d" : "transparent", color: period === v ? "white" : "#747780", border: period === v ? "none" : "1px solid #c4c6d0" }}>
-            {l}{period === v ? " ✓" : ""}
-          </button>
-        ))}
+      {/* Period & FY controls */}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: 6 }}>
+          {([["month", "This Month"], ["ytd", "Full Year"]] as const).map(([v, l]) => (
+            <button key={v} onClick={() => setPeriod(v)}
+              style={{ padding: "7px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s", background: period === v ? "#00696d" : "transparent", color: period === v ? "white" : "#747780", border: period === v ? "none" : "1px solid #c4c6d0" }}>
+              {l}
+            </button>
+          ))}
+        </div>
+        {period === "ytd" && (
+          <select className="input-field" style={{ fontSize: 13, width: "auto", minWidth: 140 }} value={fy} onChange={e => setFy(e.target.value)}>
+            {fyOptions().map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+          </select>
+        )}
       </div>
 
       {loading ? (
@@ -66,11 +90,11 @@ export default function PLStatementPage() {
             {pl.income?.map((item: any, i: number) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(196,198,208,0.2)" }}>
                 <span style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.name}</span>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: "#00696d" }}>{item.amount === 0 ? "₹0" : inr(item.amount)}</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: "#00696d" }}>{inr(item.amount)}</span>
               </div>
             ))}
             {pl.income?.length === 0 && (
-              <p style={{ fontSize: 13, color: "#747780", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No income recorded</p>
+              <p style={{ fontSize: 13, color: "#747780", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No income recorded for this period</p>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 8, borderTop: "1px solid rgba(0,105,109,0.2)" }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "#00696d", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>GROSS INCOME</span>
@@ -84,11 +108,11 @@ export default function PLStatementPage() {
             {pl.expenses?.map((item: any, i: number) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(196,198,208,0.2)" }}>
                 <span style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.name}</span>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: item.amount > 0 ? "#ba1a1a" : "#747780" }}>{item.amount === 0 ? "₹0" : inr(item.amount)}</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: item.amount > 0 ? "#ba1a1a" : "#747780" }}>{inr(item.amount)}</span>
               </div>
             ))}
             {pl.expenses?.length === 0 && (
-              <p style={{ fontSize: 13, color: "#747780", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No expenses recorded</p>
+              <p style={{ fontSize: 13, color: "#747780", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No expenses recorded for this period</p>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 8, borderTop: "1px solid rgba(27,58,107,0.2)" }}>
               <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "#1b3a6b", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL EXPENSES</span>
