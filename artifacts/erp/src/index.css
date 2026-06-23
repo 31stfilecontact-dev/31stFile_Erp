@@ -1,15 +1,85 @@
 @import "tailwindcss";
 
+/* ── Theme Variables ── */
+:root {
+  --bg-body: #f0f4f8;
+  --bg-card: rgba(255, 255, 255, 0.92);
+  --bg-card-border: rgba(196, 198, 208, 0.35);
+  --bg-card-shadow: rgba(0, 36, 82, 0.06);
+  --bg-hover: rgba(240, 243, 255, 0.5);
+  --bg-hover-strong: rgba(231, 238, 255, 0.9);
+  --bg-icon: rgba(231, 238, 255, 0.8);
+  --bg-chip: rgba(196, 198, 208, 0.35);
+  --bg-chip-s: rgba(157, 240, 244, 0.45);
+  --bg-input: white;
+  --bg-input-hover: #f0f3ff;
+  --bg-toggle: rgba(231, 238, 255, 0.6);
+  --bg-sidebar: #002452;
+  --bg-sidebar-top: #002452;
+  --bg-sidebar-border: rgba(255, 255, 255, 0.08);
+  --bg-sidebar-nav: rgba(0, 105, 109, 0.35);
+  --bg-sidebar-nav-border: #00696d;
+  --bg-sidebar-nav-inactive: rgba(255, 255, 255, 0.6);
+  --text-body: #131c2a;
+  --text-muted: #747780;
+  --text-muted-2: #44474f;
+  --text-accent: #00696d;
+  --text-primary: #1b3a6b;
+  --text-danger: #ba1a1a;
+  --text-success: #037074;
+  --input-border: #c4c6d0;
+  --placeholder: #b0b3bf;
+  --badge-bg: #e7eeff;
+  --badge-text: #1b3a6b;
+  --glass-shadow: 0 2px 16px rgba(0, 36, 82, 0.06), 0 1px 3px rgba(0, 36, 82, 0.04);
+  --glass-shadow-sm: 0 1px 6px rgba(0, 36, 82, 0.06);
+}
+
+[data-theme="dark"] {
+  --bg-body: #0b0f19;
+  --bg-card: rgba(22, 28, 42, 0.92);
+  --bg-card-border: rgba(78, 82, 98, 0.35);
+  --bg-card-shadow: rgba(0, 0, 0, 0.3);
+  --bg-hover: rgba(26, 34, 56, 0.7);
+  --bg-hover-strong: rgba(30, 40, 68, 0.9);
+  --bg-icon: rgba(36, 46, 72, 0.8);
+  --bg-chip: rgba(78, 82, 98, 0.35);
+  --bg-chip-s: rgba(0, 105, 109, 0.25);
+  --bg-input: #131c2a;
+  --bg-input-hover: #1a2242;
+  --bg-toggle: rgba(36, 46, 72, 0.6);
+  --bg-sidebar: #0a0e1a;
+  --bg-sidebar-top: #0a0e1a;
+  --bg-sidebar-border: rgba(255, 255, 255, 0.06);
+  --bg-sidebar-nav: rgba(0, 105, 109, 0.25);
+  --bg-sidebar-nav-border: #00696d;
+  --bg-sidebar-nav-inactive: rgba(255, 255, 255, 0.45);
+  --text-body: #e0e3eb;
+  --text-muted: #8b8f9e;
+  --text-muted-2: #a0a4b2;
+  --text-accent: #4dd8dc;
+  --text-primary: #7aa5e8;
+  --text-danger: #ff6b6b;
+  --text-success: #4dd8dc;
+  --input-border: #3e4250;
+  --placeholder: #5a5e6e;
+  --badge-bg: #1a2242;
+  --badge-text: #7aa5e8;
+  --glass-shadow: 0 2px 16px rgba(0, 0, 0, 0.3), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --glass-shadow-sm: 0 1px 6px rgba(0, 0, 0, 0.3);
+}
+
 /* ── Fonts ── */
 @layer base {
   * { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background: #f0f4f8;
-    color: #131c2a;
+    background: var(--bg-body);
+    color: var(--text-body);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    transition: background 0.3s, color 0.3s;
   }
 
   .material-symbols-outlined {
@@ -23,18 +93,20 @@
 
 /* ── Glass card ── */
 .glass-card {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(196, 198, 208, 0.35);
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
   border-radius: 16px;
-  box-shadow: 0 2px 16px rgba(0, 36, 82, 0.06), 0 1px 3px rgba(0, 36, 82, 0.04);
+  box-shadow: var(--glass-shadow);
   backdrop-filter: blur(12px);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 .glass-card-sm {
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid rgba(196, 198, 208, 0.35);
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
   border-radius: 12px;
-  box-shadow: 0 1px 6px rgba(0, 36, 82, 0.06);
+  box-shadow: var(--glass-shadow-sm);
+  transition: background 0.3s, border-color 0.3s, box-shadow 0.3s;
 }
 
 /* ── Buttons ── */
@@ -65,18 +137,18 @@
   gap: 6px;
   padding: 9px 16px;
   border-radius: 12px;
-  border: 1.5px solid rgba(196, 198, 208, 0.7);
+  border: 1.5px solid var(--input-border);
   cursor: pointer;
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-size: 14px;
   font-weight: 600;
   text-decoration: none;
-  background: white;
-  color: #131c2a;
+  background: var(--bg-input);
+  color: var(--text-body);
   transition: all 0.15s;
   white-space: nowrap;
 }
-.btn-outline:hover { background: #f0f3ff; border-color: #00696d; color: #00696d; }
+.btn-outline:hover { background: var(--bg-input-hover); border-color: var(--text-accent); color: var(--text-accent); }
 
 .btn-ghost {
   display: inline-flex;
@@ -91,59 +163,60 @@
   font-weight: 600;
   text-decoration: none;
   background: transparent;
-  color: #44474f;
+  color: var(--text-muted-2);
   transition: background 0.15s;
   white-space: nowrap;
 }
-.btn-ghost:hover { background: rgba(196, 198, 208, 0.25); }
+.btn-ghost:hover { background: var(--bg-chip); }
 
 /* ── Form fields ── */
 .label-field {
   display: block;
   font-size: 11px;
   font-weight: 700;
-  color: #44474f;
+  color: var(--text-muted-2);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   font-family: 'Plus Jakarta Sans', sans-serif;
   margin-bottom: 5px;
+  transition: color 0.3s;
 }
 
 .input-field {
   width: 100%;
   padding: 10px 13px;
-  border: 1.5px solid #c4c6d0;
+  border: 1.5px solid var(--input-border);
   border-radius: 10px;
   font-size: 14px;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  color: #131c2a;
-  background: white;
+  color: var(--text-body);
+  background: var(--bg-input);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.3s, color 0.3s;
 }
 .input-field:focus {
-  border-color: #00696d;
+  border-color: var(--text-accent);
   box-shadow: 0 0 0 3px rgba(0, 105, 109, 0.12);
 }
-.input-field::placeholder { color: #b0b3bf; }
+.input-field::placeholder { color: var(--placeholder); }
 
 .input-mono {
   width: 100%;
   padding: 10px 13px;
-  border: 1.5px solid #c4c6d0;
+  border: 1.5px solid var(--input-border);
   border-radius: 10px;
   font-size: 14px;
   font-family: 'JetBrains Mono', monospace;
-  color: #131c2a;
-  background: white;
+  color: var(--text-body);
+  background: var(--bg-input);
   outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.3s, color 0.3s;
 }
 .input-mono:focus {
-  border-color: #00696d;
+  border-color: var(--text-accent);
   box-shadow: 0 0 0 3px rgba(0, 105, 109, 0.12);
 }
-.input-mono::placeholder { color: #b0b3bf; }
+.input-mono::placeholder { color: var(--placeholder); }
 
 select.input-field, select.input-mono {
   appearance: none;
@@ -163,8 +236,9 @@ select.input-field, select.input-mono {
   font-size: 11px;
   font-weight: 700;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: rgba(196, 198, 208, 0.35);
-  color: #44474f;
+  background: var(--bg-chip);
+  color: var(--text-muted-2);
+  transition: background 0.3s, color 0.3s;
 }
 .chip-success {
   display: inline-flex;
@@ -174,8 +248,9 @@ select.input-field, select.input-mono {
   font-size: 11px;
   font-weight: 700;
   font-family: 'Plus Jakarta Sans', sans-serif;
-  background: rgba(157, 240, 244, 0.45);
-  color: #037074;
+  background: var(--bg-chip-s);
+  color: var(--text-success);
+  transition: background 0.3s, color 0.3s;
 }
 
 /* ── Financial rows ── */
@@ -184,17 +259,19 @@ select.input-field, select.input-mono {
   justify-content: space-between;
   align-items: center;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(196, 198, 208, 0.2);
+  border-bottom: 1px solid var(--bg-card-border);
 }
 .fin-label {
   font-size: 13px;
-  color: #44474f;
+  color: var(--text-muted-2);
   font-family: 'Plus Jakarta Sans', sans-serif;
+  transition: color 0.3s;
 }
 .fin-value {
   font-family: 'JetBrains Mono', monospace;
   font-size: 14px;
-  color: #00696d;
+  color: var(--text-accent);
+  transition: color 0.3s;
 }
 
 /* ── Space utilities ── */
@@ -225,5 +302,5 @@ select.input-field, select.input-mono {
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(196, 198, 208, 0.6); border-radius: 999px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(196, 198, 208, 0.9); }
+::-webkit-scrollbar-thumb { background: var(--bg-card-border); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }

@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState, useCallback } from "react";
 import { useRoute, Link, useLocation } from "wouter";
 import { inr, fmtDate, fyDates } from "@/lib/utils/format";
@@ -13,7 +14,7 @@ function Icon({ name, size = 20, color = "" }: { name: string; size?: number; co
 }
 
 const GROUP_COLORS: Record<string, string> = {
-  Assets: "#00696d", Liabilities: "#1b3a6b", Income: "#00696d", Expenses: "#9C6500", Equity: "#5c3d9e",
+  Assets: "var(--text-accent)", Liabilities: "var(--text-primary)", Income: "var(--text-accent)", Expenses: "#9C6500", Equity: "#5c3d9e",
 };
 
 interface LedgerLine {
@@ -70,7 +71,7 @@ export default function LedgerPage() {
   }
 
   const acct = data?.account;
-  const color = acct ? (GROUP_COLORS[acct.group] || "#1b3a6b") : "#1b3a6b";
+  const color = acct ? (GROUP_COLORS[acct.group] || "var(--text-primary)") : "var(--text-primary)";
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
@@ -80,7 +81,7 @@ export default function LedgerPage() {
             <Icon name="arrow_back" size={18} />
           </button>
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", lineHeight: 1.2 }}>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", lineHeight: 1.2 }}>
               {acct ? acct.name : "Ledger"}
             </h1>
             {acct && (
@@ -88,7 +89,7 @@ export default function LedgerPage() {
                 <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color, background: `${color}18`, padding: "2px 8px", borderRadius: 6, fontWeight: 600 }}>
                   {acct.code}
                 </span>
-                <span style={{ fontSize: 11, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                   {acct.group}{acct.subGroup ? ` › ${acct.subGroup}` : ""}
                 </span>
               </div>
@@ -126,7 +127,7 @@ export default function LedgerPage() {
               { label: "All Time", f: "2000-01-01", t: "2099-12-31" },
             ].map(({ label, f, t }) => (
               <button key={label} onClick={() => applyRange(f, t)}
-                style={{ padding: "5px 12px", borderRadius: 9999, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", background: from === f && to === t ? color : "transparent", color: from === f && to === t ? "white" : "#747780", border: from === f && to === t ? "none" : "1px solid #c4c6d0", transition: "all 0.15s" }}>
+                style={{ padding: "5px 12px", borderRadius: 9999, fontSize: 11, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", background: from === f && to === t ? color : "transparent", color: from === f && to === t ? "white" : "var(--text-muted)", border: from === f && to === t ? "none" : "1px solid var(--input-border)", transition: "all 0.15s" }}>
                 {label}
               </button>
             ))}
@@ -136,8 +137,8 @@ export default function LedgerPage() {
 
       {error && (
         <div className="glass-card p-6" style={{ textAlign: "center" }}>
-          <Icon name="error_outline" size={40} color="#ba1a1a" />
-          <p style={{ fontSize: 14, color: "#ba1a1a", marginTop: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{error}</p>
+          <Icon name="error_outline" size={40} color="var(--text-danger)" />
+          <p style={{ fontSize: 14, color: "var(--text-danger)", marginTop: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{error}</p>
           <Link href="/accounts"><a className="btn-primary" style={{ display: "inline-flex", marginTop: 12 }}>Back to Accounts</a></Link>
         </div>
       )}
@@ -147,14 +148,14 @@ export default function LedgerPage() {
           {/* Summary cards */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(170px,1fr))", gap: 12 }}>
             {[
-              { label: "Opening Balance", value: data?.openingBalance ?? 0, sub: data?.openingDrCr, icon: "start", clr: "#1b3a6b" },
+              { label: "Opening Balance", value: data?.openingBalance ?? 0, sub: data?.openingDrCr, icon: "start", clr: "var(--text-primary)" },
               { label: "Total Debits", value: data?.totalDr ?? 0, sub: "DR", icon: "arrow_downward", clr: "#9C6500" },
-              { label: "Total Credits", value: data?.totalCr ?? 0, sub: "CR", icon: "arrow_upward", clr: "#00696d" },
-              { label: "Closing Balance", value: data?.closingBalance ?? 0, sub: data?.closingDrCr, icon: "account_balance_wallet", clr: data?.closingDrCr === "CR" ? "#9C6500" : "#00696d", bold: true },
+              { label: "Total Credits", value: data?.totalCr ?? 0, sub: "CR", icon: "arrow_upward", clr: "var(--text-accent)" },
+              { label: "Closing Balance", value: data?.closingBalance ?? 0, sub: data?.closingDrCr, icon: "account_balance_wallet", clr: data?.closingDrCr === "CR" ? "#9C6500" : "var(--text-accent)", bold: true },
             ].map(c => (
               <div key={c.label} className="glass-card p-4" style={{ borderTop: `3px solid ${c.clr}` }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                  <p style={{ fontSize: 10, fontWeight: 700, color: "#747780", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{c.label}</p>
+                  <p style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{c.label}</p>
                   <Icon name={c.icon} size={16} color={c.clr} />
                 </div>
                 <p style={{ fontSize: c.bold ? 20 : 18, fontWeight: 800, color: c.clr, fontFamily: "'JetBrains Mono',monospace", marginTop: 6 }}>
@@ -169,61 +170,61 @@ export default function LedgerPage() {
 
           {/* Ledger table */}
           <div className="glass-card overflow-hidden">
-            <div style={{ display: "grid", gridTemplateColumns: "110px 140px 1fr 120px 120px 130px 56px", padding: "10px 16px", background: "#1b3a6b", gap: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "110px 140px 1fr 120px 120px 130px 56px", padding: "10px 16px", background: "var(--text-primary)", gap: 8 }}>
               {["Date", "Voucher No", "Narration", "Debit (₹)", "Credit (₹)", "Balance", "Dr/Cr"].map(h => (
                 <p key={h} style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.85)", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: h.includes("₹") || h === "Dr/Cr" || h === "Balance" ? "right" : "left" }}>{h}</p>
               ))}
             </div>
 
             {!loading && data && (
-              <div style={{ display: "grid", gridTemplateColumns: "110px 140px 1fr 120px 120px 130px 56px", padding: "10px 16px", gap: 8, background: "rgba(231,238,255,0.5)", borderBottom: "1px solid rgba(196,198,208,0.25)" }}>
-                <span style={{ fontSize: 11, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{from ? fmtDate(from) : "—"}</span>
-                <span style={{ fontSize: 11, color: "#747780", fontFamily: "'JetBrains Mono',monospace" }}>—</span>
-                <span style={{ fontSize: 12, color: "#44474f", fontWeight: 600, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Opening Balance</span>
+              <div style={{ display: "grid", gridTemplateColumns: "110px 140px 1fr 120px 120px 130px 56px", padding: "10px 16px", gap: 8, background: "var(--bg-hover)", borderBottom: "1px solid var(--bg-card-border)" }}>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{from ? fmtDate(from) : "—"}</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>—</span>
+                <span style={{ fontSize: 12, color: "var(--text-muted-2)", fontWeight: 600, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Opening Balance</span>
                 <span /><span />
-                <span style={{ fontSize: 12, fontWeight: 700, color: "#1b3a6b", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{inr(data.openingBalance)}</span>
-                <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 9999, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "right", background: data.openingDrCr === "DR" ? "rgba(157,240,244,0.35)" : "rgba(255,243,214,0.6)", color: data.openingDrCr === "DR" ? "#037074" : "#9C6500" }}>{data.openingDrCr}</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-primary)", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{inr(data.openingBalance)}</span>
+                <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 9999, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "right", background: data.openingDrCr === "DR" ? "rgba(157,240,244,0.35)" : "rgba(255,243,214,0.6)", color: data.openingDrCr === "DR" ? "var(--text-success)" : "#9C6500" }}>{data.openingDrCr}</span>
               </div>
             )}
 
             {loading ? (
               <div style={{ padding: 60, textAlign: "center" }}>
-                <Icon name="autorenew" size={40} color="#00696d" />
+                <Icon name="autorenew" size={40} color="var(--text-accent)" />
               </div>
             ) : data?.lines.length === 0 ? (
               <div style={{ padding: 60, textAlign: "center" }}>
-                <Icon name="receipt_long" size={44} color="#c4c6d0" />
-                <p style={{ fontSize: 14, color: "#747780", marginTop: 10, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No transactions in this period.</p>
+                <Icon name="receipt_long" size={44} color="var(--input-border)" />
+                <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 10, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No transactions in this period.</p>
               </div>
             ) : (
               data?.lines.map((l, i) => (
                 <div key={l.lineId}
                   style={{ display: "grid", gridTemplateColumns: "110px 140px 1fr 120px 120px 130px 56px", padding: "11px 16px", gap: 8, borderBottom: "1px solid rgba(196,198,208,0.18)", background: i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.28)", cursor: "pointer" }}
                   onClick={() => setVoucherId(l.entryId)}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(231,238,255,0.6)")}
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover)")}
                   onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.28)")}>
-                  <span style={{ fontSize: 12, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{fmtDate(l.entryDate)}</span>
-                  <span style={{ fontSize: 11, color: "#1b3a6b", fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>{l.voucherNo}</span>
+                  <span style={{ fontSize: 12, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{fmtDate(l.entryDate)}</span>
+                  <span style={{ fontSize: 11, color: "var(--text-primary)", fontFamily: "'JetBrains Mono',monospace", fontWeight: 600 }}>{l.voucherNo}</span>
                   <div style={{ minWidth: 0 }}>
-                    <p style={{ fontSize: 12, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.narration}</p>
-                    {l.lineNote && <p style={{ fontSize: 10, color: "#747780", marginTop: 1, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{l.lineNote}</p>}
+                    <p style={{ fontSize: 12, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{l.narration}</p>
+                    {l.lineNote && <p style={{ fontSize: 10, color: "var(--text-muted)", marginTop: 1, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{l.lineNote}</p>}
                   </div>
-                  <p style={{ fontSize: 13, color: l.dr ? "#9C6500" : "#c4c6d0", fontFamily: "'JetBrains Mono',monospace", textAlign: "right", fontWeight: l.dr ? 700 : 400 }}>{l.dr ? inr(l.dr) : "—"}</p>
-                  <p style={{ fontSize: 13, color: l.cr ? "#00696d" : "#c4c6d0", fontFamily: "'JetBrains Mono',monospace", textAlign: "right", fontWeight: l.cr ? 700 : 400 }}>{l.cr ? inr(l.cr) : "—"}</p>
-                  <p style={{ fontSize: 13, color: "#131c2a", fontFamily: "'JetBrains Mono',monospace", textAlign: "right", fontWeight: 600 }}>{inr(l.balance)}</p>
-                  <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 9999, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "center", background: l.balanceDrCr === "DR" ? "rgba(157,240,244,0.35)" : "rgba(255,243,214,0.6)", color: l.balanceDrCr === "DR" ? "#037074" : "#9C6500" }}>{l.balanceDrCr}</span>
+                  <p style={{ fontSize: 13, color: l.dr ? "#9C6500" : "var(--input-border)", fontFamily: "'JetBrains Mono',monospace", textAlign: "right", fontWeight: l.dr ? 700 : 400 }}>{l.dr ? inr(l.dr) : "—"}</p>
+                  <p style={{ fontSize: 13, color: l.cr ? "var(--text-accent)" : "var(--input-border)", fontFamily: "'JetBrains Mono',monospace", textAlign: "right", fontWeight: l.cr ? 700 : 400 }}>{l.cr ? inr(l.cr) : "—"}</p>
+                  <p style={{ fontSize: 13, color: "var(--text-body)", fontFamily: "'JetBrains Mono',monospace", textAlign: "right", fontWeight: 600 }}>{inr(l.balance)}</p>
+                  <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 9999, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "center", background: l.balanceDrCr === "DR" ? "rgba(157,240,244,0.35)" : "rgba(255,243,214,0.6)", color: l.balanceDrCr === "DR" ? "var(--text-success)" : "#9C6500" }}>{l.balanceDrCr}</span>
                 </div>
               ))
             )}
 
             {!loading && data && data.lines.length > 0 && (
               <div style={{ display: "grid", gridTemplateColumns: "110px 140px 1fr 120px 120px 130px 56px", padding: "12px 16px", gap: 8, background: "rgba(27,58,107,0.06)", borderTop: "2px solid rgba(27,58,107,0.15)" }}>
-                <span style={{ fontSize: 11, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{to ? fmtDate(to) : "—"}</span>
-                <span /><span style={{ fontSize: 12, color: "#131c2a", fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Closing Balance</span>
+                <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{to ? fmtDate(to) : "—"}</span>
+                <span /><span style={{ fontSize: 12, color: "var(--text-body)", fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Closing Balance</span>
                 <p style={{ fontSize: 13, fontWeight: 700, color: "#9C6500", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{data.totalDr ? inr(data.totalDr) : "—"}</p>
-                <p style={{ fontSize: 13, fontWeight: 700, color: "#00696d", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{data.totalCr ? inr(data.totalCr) : "—"}</p>
-                <p style={{ fontSize: 14, fontWeight: 800, color: "#131c2a", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{inr(data.closingBalance)}</p>
-                <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 9999, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "center", background: data.closingDrCr === "DR" ? "rgba(157,240,244,0.35)" : "rgba(255,243,214,0.6)", color: data.closingDrCr === "DR" ? "#037074" : "#9C6500" }}>{data.closingDrCr}</span>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-accent)", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{data.totalCr ? inr(data.totalCr) : "—"}</p>
+                <p style={{ fontSize: 14, fontWeight: 800, color: "var(--text-body)", fontFamily: "'JetBrains Mono',monospace", textAlign: "right" }}>{inr(data.closingBalance)}</p>
+                <span style={{ fontSize: 10, padding: "2px 6px", borderRadius: 9999, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: "center", background: data.closingDrCr === "DR" ? "rgba(157,240,244,0.35)" : "rgba(255,243,214,0.6)", color: data.closingDrCr === "DR" ? "var(--text-success)" : "#9C6500" }}>{data.closingDrCr}</span>
               </div>
             )}
           </div>

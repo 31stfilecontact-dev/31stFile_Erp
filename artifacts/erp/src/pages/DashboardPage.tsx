@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { inr } from "@/lib/utils/format";
+import { useTheme } from "@/context/ThemeContext";
 
 function Icon({ name, size = 22, color = "" }: { name: string; size?: number; color?: string }) {
   return (
@@ -9,6 +10,10 @@ function Icon({ name, size = 22, color = "" }: { name: string; size?: number; co
       {name}
     </span>
   );
+}
+
+function ThemeText({ muted, style, children }: { muted?: boolean; style?: React.CSSProperties; children: React.ReactNode }) {
+  return <span style={{ color: muted ? "var(--text-muted)" : "var(--text-body)", ...style }}>{children}</span>;
 }
 
 export default function DashboardPage() {
@@ -49,10 +54,10 @@ export default function DashboardPage() {
       {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 12 }}>
         <div>
-          <h1 style={{ fontSize: 26, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <h1 style={{ fontSize: 26, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Dashboard
           </h1>
-          <p style={{ fontSize: 13, color: "#747780", marginTop: 3, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 3, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Welcome back · {new Date().toLocaleDateString("en-IN", { weekday: "long", year: "numeric", month: "long", day: "numeric" })}
           </p>
         </div>
@@ -68,7 +73,7 @@ export default function DashboardPage() {
         {CARDS.map(c => (
           <div key={c.label} className="glass-card p-5" style={{ borderTop: `3px solid ${c.color}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-              <p style={{ fontSize: 11, fontWeight: 700, color: "#747780", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 {c.label}
               </p>
               <div style={{ width: 36, height: 36, borderRadius: 10, background: c.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -86,7 +91,7 @@ export default function DashboardPage() {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1.5fr", gap: 20 }}>
         {/* Quick links */}
         <div className="glass-card p-5">
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 14 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 14 }}>
             Quick Actions
           </h2>
           <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -95,18 +100,18 @@ export default function DashboardPage() {
                 <a style={{
                   display: "flex", alignItems: "center", gap: 10,
                   padding: "10px 12px", borderRadius: 10, textDecoration: "none",
-                  background: "rgba(240,243,255,0.5)", transition: "background 0.15s",
-                  color: "#131c2a",
+                  background: "var(--bg-hover)", transition: "background 0.15s",
+                  color: "var(--text-body)",
                 }}
-                  onMouseEnter={e => (e.currentTarget.style.background = "rgba(231,238,255,0.9)")}
-                  onMouseLeave={e => (e.currentTarget.style.background = "rgba(240,243,255,0.5)")}>
+                  onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover-strong)")}
+                  onMouseLeave={e => (e.currentTarget.style.background = "var(--bg-hover)")}>
                   <div style={{ width: 32, height: 32, borderRadius: 8, background: `${l.color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <Icon name={l.icon} size={17} color={l.color} />
                   </div>
                   <span style={{ fontSize: 13, fontWeight: 600, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                     {l.label}
                   </span>
-                  <Icon name="chevron_right" size={16} color="#c4c6d0" style={{ marginLeft: "auto" } as any} />
+                  <Icon name="chevron_right" size={16} color="var(--text-muted)" style={{ marginLeft: "auto" } as any} />
                 </a>
               </Link>
             ))}
@@ -116,23 +121,23 @@ export default function DashboardPage() {
         {/* Recent entries */}
         <div className="glass-card p-5">
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               Recent Entries
             </h2>
             <Link href="/transactions">
-              <a style={{ fontSize: 12, color: "#00696d", fontWeight: 600, fontFamily: "'Plus Jakarta Sans',sans-serif", textDecoration: "none" }}>
+              <a style={{ fontSize: 12, color: "var(--text-accent)", fontWeight: 600, fontFamily: "'Plus Jakarta Sans',sans-serif", textDecoration: "none" }}>
                 View all →
               </a>
             </Link>
           </div>
           {loading ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Icon name="autorenew" size={36} color="#00696d" />
+              <Icon name="autorenew" size={36} color="var(--text-accent)" />
             </div>
           ) : s.recentEntries?.length === 0 ? (
             <div style={{ textAlign: "center", padding: 40 }}>
-              <Icon name="receipt_long" size={40} color="#c4c6d0" />
-              <p style={{ fontSize: 13, color: "#747780", marginTop: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              <Icon name="receipt_long" size={40} color="var(--text-muted)" />
+              <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 No entries yet
               </p>
             </div>
@@ -141,19 +146,19 @@ export default function DashboardPage() {
               {s.recentEntries?.map((e: any) => (
                 <div key={e.id} style={{
                   display: "flex", alignItems: "center", gap: 10,
-                  padding: "10px 0", borderBottom: "1px solid rgba(196,198,208,0.2)",
+                  padding: "10px 0", borderBottom: "1px solid var(--bg-card-border)",
                 }}>
                   <div style={{
                     width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                    background: "rgba(231,238,255,0.8)", display: "flex", alignItems: "center", justifyContent: "center",
+                    background: "var(--bg-icon)", display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <Icon name="receipt" size={18} color="#1b3a6b" />
+                    <Icon name="receipt" size={18} color="var(--text-primary)" />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {e.narration}
                     </p>
-                    <p style={{ fontSize: 11, color: "#747780", fontFamily: "'JetBrains Mono',monospace" }}>
+                    <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'JetBrains Mono',monospace" }}>
                       {e.voucherNo} · {e.entryDate}
                     </p>
                   </div>
@@ -167,14 +172,14 @@ export default function DashboardPage() {
       {/* Footer stats */}
       <div style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
         <div className="glass-card-sm p-4" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Icon name="receipt_long" size={20} color="#1b3a6b" />
-          <span style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <Icon name="receipt_long" size={20} color="var(--text-primary)" />
+          <span style={{ fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             <strong>{s.totalEntries}</strong> total entries
           </span>
         </div>
         <div className="glass-card-sm p-4" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Icon name="account_tree" size={20} color="#00696d" />
-          <span style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <Icon name="account_tree" size={20} color="var(--text-accent)" />
+          <span style={{ fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             <strong>{s.totalAccounts}</strong> accounts in chart
           </span>
         </div>

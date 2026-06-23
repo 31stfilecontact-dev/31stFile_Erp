@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { inr } from "@/lib/utils/format";
 import { Link } from "wouter";
@@ -45,18 +46,18 @@ export default function PLStatementPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(0,105,109,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Icon name="trending_up" size={24} color="#00696d" />
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--bg-chip-s)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Icon name="trending_up" size={24} color="var(--text-accent)" />
         </div>
         <div style={{ flex: 1 }}>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Profit &amp; Loss Statement
           </h1>
-          <p style={{ fontSize: 12, color: "#747780", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             {data?.from && data?.to ? `${data.from} to ${data.to}` : "Loading…"}
           </p>
         </div>
-        <button onClick={() => window.print()} style={{ padding: 8, borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "#747780" }}>
+        <button onClick={() => window.print()} style={{ padding: 8, borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)" }}>
           <Icon name="print" size={22} />
         </button>
       </div>
@@ -66,7 +67,7 @@ export default function PLStatementPage() {
         <div style={{ display: "flex", gap: 6 }}>
           {([["month", "This Month"], ["ytd", "Full Year"]] as const).map(([v, l]) => (
             <button key={v} onClick={() => setPeriod(v)}
-              style={{ padding: "7px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s", background: period === v ? "#00696d" : "transparent", color: period === v ? "white" : "#747780", border: period === v ? "none" : "1px solid #c4c6d0" }}>
+              style={{ padding: "7px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s", background: period === v ? "var(--text-accent)" : "transparent", color: period === v ? "white" : "var(--text-muted)", border: period === v ? "none" : "1px solid var(--input-border)" }}>
               {l}
             </button>
           ))}
@@ -80,48 +81,48 @@ export default function PLStatementPage() {
 
       {loading ? (
         <div className="glass-card p-12" style={{ textAlign: "center" }}>
-          <Icon name="autorenew" size={40} color="#00696d" />
+          <Icon name="autorenew" size={40} color="var(--text-accent)" />
         </div>
       ) : (
         <div className="glass-card overflow-hidden">
           {/* Income */}
-          <div style={{ padding: 16, borderLeft: "4px solid #00696d" }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#44474f", textTransform: "uppercase", marginBottom: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>INCOME</p>
+          <div style={{ padding: 16, borderLeft: "4px solid var(--text-accent)" }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "var(--text-muted-2)", textTransform: "uppercase", marginBottom: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>INCOME</p>
             {pl.income?.map((item: any, i: number) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(196,198,208,0.2)" }}>
-                <span style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.name}</span>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: "#00696d" }}>{inr(item.amount)}</span>
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--bg-card-border)" }}>
+                <span style={{ fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.name}</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: "var(--text-accent)" }}>{inr(item.amount)}</span>
               </div>
             ))}
             {pl.income?.length === 0 && (
-              <p style={{ fontSize: 13, color: "#747780", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No income recorded for this period</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No income recorded for this period</p>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 8, borderTop: "1px solid rgba(0,105,109,0.2)" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "#00696d", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>GROSS INCOME</span>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 15, fontWeight: 700, color: "#00696d" }}>{inr(pl.grossIncome)}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-accent)", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>GROSS INCOME</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 15, fontWeight: 700, color: "var(--text-accent)" }}>{inr(pl.grossIncome)}</span>
             </div>
           </div>
 
           {/* Expenses */}
-          <div style={{ padding: 16, borderLeft: "4px solid #1b3a6b" }}>
-            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "#44474f", textTransform: "uppercase", marginBottom: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>EXPENSES</p>
+          <div style={{ padding: 16, borderLeft: "4px solid var(--text-primary)" }}>
+            <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.08em", color: "var(--text-muted-2)", textTransform: "uppercase", marginBottom: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>EXPENSES</p>
             {pl.expenses?.map((item: any, i: number) => (
-              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid rgba(196,198,208,0.2)" }}>
-                <span style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.name}</span>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: item.amount > 0 ? "#ba1a1a" : "#747780" }}>{inr(item.amount)}</span>
+              <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: "1px solid var(--bg-card-border)" }}>
+                <span style={{ fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.name}</span>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, color: item.amount > 0 ? "var(--text-danger)" : "var(--text-muted)" }}>{inr(item.amount)}</span>
               </div>
             ))}
             {pl.expenses?.length === 0 && (
-              <p style={{ fontSize: 13, color: "#747780", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No expenses recorded for this period</p>
+              <p style={{ fontSize: 13, color: "var(--text-muted)", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No expenses recorded for this period</p>
             )}
             <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 10, marginTop: 8, borderTop: "1px solid rgba(27,58,107,0.2)" }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "#1b3a6b", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL EXPENSES</span>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 15, fontWeight: 700, color: "#ba1a1a" }}>{inr(pl.totalExpenses)}</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.05em", color: "var(--text-primary)", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL EXPENSES</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 15, fontWeight: 700, color: "var(--text-danger)" }}>{inr(pl.totalExpenses)}</span>
             </div>
           </div>
 
           {/* Net Profit */}
-          <div style={{ padding: 20, background: isProfit ? "#00696d" : "#ba1a1a" }}>
+          <div style={{ padding: 20, background: isProfit ? "var(--text-accent)" : "var(--text-danger)" }}>
             <p style={{ fontSize: 11, fontWeight: 700, letterSpacing: "0.1em", color: "rgba(255,255,255,0.70)", textTransform: "uppercase", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               {isProfit ? "NET PROFIT" : "NET LOSS"}
             </p>

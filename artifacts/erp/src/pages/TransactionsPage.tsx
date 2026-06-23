@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { fmtDate, inr } from "@/lib/utils/format";
@@ -11,6 +12,7 @@ function Icon({ name, size = 20, color = "" }: { name: string; size?: number; co
     </span>
   );
 }
+const T = { body: "var(--text-body)", muted: "var(--text-muted)", accent: "var(--text-accent)", primary: "var(--text-primary)", danger: "var(--text-danger)", border: "var(--bg-card-border)", hover: "var(--bg-hover)", icon: "var(--bg-icon)", badge: "var(--badge-bg)", badgeText: "var(--badge-text)" };
 
 const TYPES = ["ALL", "PAYMENT", "RECEIPT", "JOURNAL", "SALES", "PURCHASE"];
 
@@ -42,7 +44,7 @@ export default function TransactionsPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
           Transactions
         </h1>
         <Link href="/journal-entry">
@@ -54,7 +56,7 @@ export default function TransactionsPage() {
 
       <div style={{ position: "relative" }}>
         <span style={{ position: "absolute", left: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }}>
-          <Icon name="search" size={20} color="#747780" />
+          <Icon name="search" size={20} color="var(--text-muted)" />
         </span>
         <input type="text" className="input-field" style={{ paddingLeft: 40 }}
           placeholder="Search narration, voucher no..." value={search} onChange={e => setSearch(e.target.value)} />
@@ -66,9 +68,9 @@ export default function TransactionsPage() {
             style={{
               padding: "5px 14px", borderRadius: 9999, fontSize: 11, fontWeight: 700, cursor: "pointer",
               fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s",
-              background: filter === f ? "#00696d" : "transparent",
-              color: filter === f ? "white" : "#747780",
-              border: filter === f ? "none" : "1px solid #c4c6d0",
+              background: filter === f ? "var(--text-accent)" : "transparent",
+              color: filter === f ? "white" : "var(--text-muted)",
+              border: filter === f ? "none" : "1px solid var(--input-border)",
             }}>{f}</button>
         ))}
       </div>
@@ -76,12 +78,12 @@ export default function TransactionsPage() {
       <div className="glass-card overflow-hidden">
         {loading ? (
           <div style={{ padding: 60, textAlign: "center" }}>
-            <Icon name="autorenew" size={40} color="#00696d" />
+            <Icon name="autorenew" size={40} color="var(--text-accent)" />
           </div>
         ) : filtered.length === 0 ? (
           <div style={{ padding: 60, textAlign: "center" }}>
-            <Icon name="inbox" size={44} color="#c4c6d0" />
-            <p style={{ fontSize: 14, color: "#747780", marginTop: 10, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <Icon name="inbox" size={44} color="var(--input-border)" />
+            <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 10, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               {entries.length === 0 ? "No entries yet." : "No entries match your search."}
             </p>
             {entries.length === 0 && (
@@ -97,67 +99,67 @@ export default function TransactionsPage() {
             const isExpanded = expanded === e.id;
 
             return (
-              <div key={e.id} style={{ borderBottom: "1px solid rgba(196,198,208,0.2)" }}>
+              <div key={e.id} style={{ borderBottom: "1px solid var(--bg-card-border)" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", cursor: "pointer", transition: "background 0.15s" }}
                   onClick={() => setExpanded(isExpanded ? null : e.id)}
-                  onMouseEnter={ev => (ev.currentTarget.style.background = "rgba(240,243,255,0.7)")}
+                  onMouseEnter={ev => (ev.currentTarget.style.background = "var(--bg-hover)")}
                   onMouseLeave={ev => (ev.currentTarget.style.background = "transparent")}>
-                  <div style={{ width: 40, height: 40, borderRadius: 12, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "rgba(231,238,255,0.7)" }}>
-                    <Icon name={e.voucherType === "PAYMENT" ? "arrow_upward" : e.voucherType === "RECEIPT" ? "arrow_downward" : "receipt"} size={20} color={e.voucherType === "PAYMENT" ? "#ba1a1a" : e.voucherType === "RECEIPT" ? "#00696d" : "#1b3a6b"} />
+                  <div style={{ width: 40, height: 40, borderRadius: 12, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg-hover-strong)" }}>
+                    <Icon name={e.voucherType === "PAYMENT" ? "arrow_upward" : e.voucherType === "RECEIPT" ? "arrow_downward" : "receipt"} size={20} color={e.voucherType === "PAYMENT" ? "var(--text-danger)" : e.voucherType === "RECEIPT" ? "var(--text-accent)" : "var(--text-primary)"} />
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ fontSize: 13, fontWeight: 600, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {e.narration}
                     </p>
                     <div style={{ display: "flex", gap: 8, marginTop: 3, alignItems: "center" }}>
-                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#747780" }}>{e.voucherNo}</span>
-                      <span style={{ color: "#c4c6d0", fontSize: 10 }}>·</span>
-                      <span style={{ fontSize: 11, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "var(--text-muted)" }}>{e.voucherNo}</span>
+                      <span style={{ color: "var(--input-border)", fontSize: 10 }}>·</span>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                         {e.entryDate ? fmtDate(e.entryDate) : "—"}
                       </span>
                     </div>
                   </div>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4, flexShrink: 0 }}>
                     {amount > 0 && (
-                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, fontWeight: 700, color: "#131c2a" }}>
+                      <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 14, fontWeight: 700, color: "var(--text-body)" }}>
                         {inr(amount)}
                       </span>
                     )}
-                    <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 9999, fontWeight: 700, background: "#e7eeff", color: "#1b3a6b", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                    <span style={{ fontSize: 10, padding: "2px 8px", borderRadius: 9999, fontWeight: 700, background: "var(--badge-bg)", color: "var(--text-primary)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                       {e.voucherType}
                     </span>
-                    <span style={{ fontSize: 14, color: "#c4c6d0", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", display: "inline-flex" }}>
-                      <Icon name="expand_more" size={18} color="#747780" />
+                    <span style={{ fontSize: 14, color: "var(--input-border)", transform: isExpanded ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s", display: "inline-flex" }}>
+                      <Icon name="expand_more" size={18} color="var(--text-muted)" />
                     </span>
                   </div>
                 </div>
 
                 {isExpanded && (
-                  <div style={{ background: "rgba(240,243,255,0.5)", padding: "12px 16px 16px", borderTop: "1px solid rgba(196,198,208,0.15)" }}>
+                  <div style={{ background: "var(--bg-hover)", padding: "12px 16px 16px", borderTop: "1px solid var(--bg-card-border)" }}>
                     {/* DR/CR lines table */}
                     {lines.length > 0 ? (
                       <div style={{ marginBottom: 12 }}>
                         <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: "6px 14px", marginBottom: 6 }}>
                           {["", "Account", "DR", "CR"].map((h, i) => (
-                            <span key={i} style={{ fontSize: 10, fontWeight: 700, color: "#747780", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: i >= 2 ? "right" : "left" }}>{h}</span>
+                            <span key={i} style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: i >= 2 ? "right" : "left" }}>{h}</span>
                           ))}
                         </div>
                         {lines.map((l: any, li: number) => (
-                          <div key={li} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: "6px 14px", padding: "6px 0", borderBottom: "1px solid rgba(196,198,208,0.12)", alignItems: "center" }}>
+                          <div key={li} style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: "6px 14px", padding: "6px 0", borderBottom: "1px solid var(--bg-card-border)", alignItems: "center" }}>
                             <span style={{
                               fontSize: 9, fontWeight: 800, fontFamily: "'Plus Jakarta Sans',sans-serif",
                               background: l.side === "DR" ? "rgba(186,26,26,0.1)" : "rgba(0,105,109,0.1)",
-                              color: l.side === "DR" ? "#ba1a1a" : "#00696d",
+                              color: l.side === "DR" ? "var(--text-danger)" : "var(--text-accent)",
                               borderRadius: 4, padding: "2px 5px",
                             }}>{l.side}</span>
-                            <span style={{ fontSize: 13, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                              {l.accountCode && <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "#747780", marginRight: 6 }}>{l.accountCode}</span>}
+                            <span style={{ fontSize: 13, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                              {l.accountCode && <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 11, color: "var(--text-muted)", marginRight: 6 }}>{l.accountCode}</span>}
                               {l.accountName}
                             </span>
-                            <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "#ba1a1a", textAlign: "right", fontWeight: 600 }}>
+                            <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-danger)", textAlign: "right", fontWeight: 600 }}>
                               {l.side === "DR" ? inr(parseFloat(l.amount)) : "—"}
                             </span>
-                            <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "#00696d", textAlign: "right", fontWeight: 600 }}>
+                            <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-accent)", textAlign: "right", fontWeight: 600 }}>
                               {l.side === "CR" ? inr(parseFloat(l.amount)) : "—"}
                             </span>
                           </div>
@@ -165,17 +167,17 @@ export default function TransactionsPage() {
                         {/* Totals */}
                         <div style={{ display: "grid", gridTemplateColumns: "auto 1fr auto auto", gap: "6px 14px", padding: "8px 0 0" }}>
                           <span />
-                          <span style={{ fontSize: 11, fontWeight: 700, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL</span>
-                          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "#ba1a1a", textAlign: "right", fontWeight: 700 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL</span>
+                          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-danger)", textAlign: "right", fontWeight: 700 }}>
                             {inr(lines.filter(l => l.side === "DR").reduce((s: number, l: any) => s + parseFloat(l.amount), 0))}
                           </span>
-                          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "#00696d", textAlign: "right", fontWeight: 700 }}>
+                          <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", color: "var(--text-accent)", textAlign: "right", fontWeight: 700 }}>
                             {inr(lines.filter(l => l.side === "CR").reduce((s: number, l: any) => s + parseFloat(l.amount), 0))}
                           </span>
                         </div>
                       </div>
                     ) : (
-                      <p style={{ fontSize: 12, color: "#b0b3bf", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>No line details available.</p>
+                      <p style={{ fontSize: 12, color: "var(--placeholder)", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>No line details available.</p>
                     )}
                     <button className="btn-outline" style={{ fontSize: 12, padding: "6px 14px" }}
                       onClick={() => setVoucherId(e.id)}>

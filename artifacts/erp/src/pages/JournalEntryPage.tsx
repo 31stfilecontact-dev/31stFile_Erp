@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 import { inr } from "@/lib/utils/format";
@@ -89,29 +90,29 @@ export default function JournalEntryPage() {
   return (
     <div className="max-w-2xl mx-auto space-y-4">
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(27,58,107,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon name="edit_note" size={24} color="#1b3a6b" />
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--bg-icon)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="edit_note" size={24} color="var(--text-primary)" />
         </div>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Journal Entry
           </h1>
-          <p style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Double-entry bookkeeping
           </p>
         </div>
       </div>
 
       {error && (
-        <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(255,218,214,0.7)", borderLeft: "4px solid #ba1a1a", display: "flex", gap: 8 }}>
-          <Icon name="error" size={16} color="#ba1a1a" />
-          <p style={{ fontSize: 13, color: "#ba1a1a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{error}</p>
+        <div style={{ padding: "10px 14px", borderRadius: 10, background: "var(--bg-card-border)", borderLeft: "4px solid var(--text-danger)", display: "flex", gap: 8 }}>
+          <Icon name="error" size={16} color="var(--text-danger)" />
+          <p style={{ fontSize: 13, color: "var(--text-danger)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{error}</p>
         </div>
       )}
       {success && (
-        <div style={{ padding: "10px 14px", borderRadius: 10, background: "rgba(220,242,232,0.7)", borderLeft: "4px solid #00696d", display: "flex", gap: 8 }}>
-          <Icon name="check_circle" size={16} color="#00696d" />
-          <p style={{ fontSize: 13, color: "#00696d", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{success}</p>
+        <div style={{ padding: "10px 14px", borderRadius: 10, background: "var(--bg-hover)", borderLeft: "4px solid var(--text-accent)", display: "flex", gap: 8 }}>
+          <Icon name="check_circle" size={16} color="var(--text-accent)" />
+          <p style={{ fontSize: 13, color: "var(--text-accent)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{success}</p>
         </div>
       )}
 
@@ -146,7 +147,7 @@ export default function JournalEntryPage() {
         {/* Lines */}
         <div className="glass-card overflow-hidden">
           {/* Table header */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.5fr 80px 160px auto auto", gap: 8, padding: "10px 16px", background: "#1b3a6b" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1.5fr 80px 160px auto auto", gap: 8, padding: "10px 16px", background: "var(--text-primary)" }}>
             {["Account", "Dr/Cr", "Amount (₹)", "Note", ""].map((h, i) => (
               <p key={i} style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: "0.06em", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 {h}
@@ -156,7 +157,7 @@ export default function JournalEntryPage() {
 
           {/* Lines */}
           {lines.map((line, i) => (
-            <div key={line.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 80px 160px auto auto", gap: 8, padding: "10px 16px", borderBottom: "1px solid rgba(196,198,208,0.2)", alignItems: "center" }}>
+            <div key={line.id} style={{ display: "grid", gridTemplateColumns: "1.5fr 80px 160px auto auto", gap: 8, padding: "10px 16px", borderBottom: "1px solid var(--bg-card-border)", alignItems: "center" }}>
               <select className="input-field" style={{ fontSize: 13 }} required
                 value={line.accountId} onChange={e => updateLine(line.id, "accountId", e.target.value)}>
                 <option value="">Select account…</option>
@@ -164,7 +165,7 @@ export default function JournalEntryPage() {
                   <option key={a.id} value={a.id}>{a.code} — {a.name}</option>
                 ))}
               </select>
-              <select className="input-field" style={{ fontSize: 13, fontWeight: 700, color: line.side === "DR" ? "#9C6500" : "#00696d" }}
+              <select className="input-field" style={{ fontSize: 13, fontWeight: 700, color: line.side === "DR" ? "#9C6500" : "var(--text-accent)" }}
                 value={line.side} onChange={e => updateLine(line.id, "side", e.target.value as "DR" | "CR")}>
                 <option value="DR">DR</option>
                 <option value="CR">CR</option>
@@ -178,7 +179,7 @@ export default function JournalEntryPage() {
               <button type="button" onClick={() => removeLine(line.id)}
                 disabled={lines.length <= 2}
                 style={{ padding: 6, borderRadius: 8, border: "none", cursor: lines.length <= 2 ? "not-allowed" : "pointer", background: "rgba(186,26,26,0.1)", opacity: lines.length <= 2 ? 0.3 : 1 }}>
-                <Icon name="delete" size={16} color="#ba1a1a" />
+                <Icon name="delete" size={16} color="var(--text-danger)" />
               </button>
             </div>
           ))}
@@ -191,14 +192,14 @@ export default function JournalEntryPage() {
           </div>
 
           {/* Totals */}
-          <div style={{ display: "grid", gridTemplateColumns: "1.5fr 80px 160px auto auto", gap: 8, padding: "12px 16px", background: "rgba(240,243,255,0.6)", borderTop: "2px solid rgba(196,198,208,0.3)" }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL</span>
+          <div style={{ display: "grid", gridTemplateColumns: "1.5fr 80px 160px auto auto", gap: 8, padding: "12px 16px", background: "rgba(240,243,255,0.6)", borderTop: "2px solid var(--bg-card-border)" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>TOTAL</span>
             <span />
             <div style={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "#9C6500", fontWeight: 700 }}>
                 DR: {inr(totalDR)}
               </span>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "#00696d", fontWeight: 700 }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "var(--text-accent)", fontWeight: 700 }}>
                 CR: {inr(totalCR)}
               </span>
             </div>
@@ -209,12 +210,12 @@ export default function JournalEntryPage() {
           {/* Balance indicator */}
           <div style={{
             padding: "10px 16px", display: "flex", alignItems: "center", gap: 8,
-            background: balanced ? "rgba(220,242,232,0.7)" : (totalDR > 0 || totalCR > 0) ? "rgba(255,218,214,0.7)" : "transparent",
+            background: balanced ? "var(--bg-hover)" : (totalDR > 0 || totalCR > 0) ? "var(--bg-card-border)" : "transparent",
           }}>
             {(totalDR > 0 || totalCR > 0) && (
               <>
-                <Icon name={balanced ? "check_circle" : "error"} size={16} color={balanced ? "#00696d" : "#ba1a1a"} />
-                <p style={{ fontSize: 12, color: balanced ? "#00696d" : "#ba1a1a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                <Icon name={balanced ? "check_circle" : "error"} size={16} color={balanced ? "var(--text-accent)" : "var(--text-danger)"} />
+                <p style={{ fontSize: 12, color: balanced ? "var(--text-accent)" : "var(--text-danger)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                   {balanced ? "Entry is balanced" : `Difference: ${inr(Math.abs(totalDR - totalCR))}`}
                 </p>
               </>

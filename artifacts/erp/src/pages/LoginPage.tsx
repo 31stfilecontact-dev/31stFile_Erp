@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useTheme } from "@/context/ThemeContext";
 
 function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
   return (
@@ -12,10 +13,12 @@ function Icon({ name, size = 20, color = "" }: { name: string; size?: number; co
 
 export default function LoginPage() {
   const [, setLocation] = useLocation();
+  const { theme, toggle } = useTheme();
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const isDark = theme === "dark";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -42,29 +45,37 @@ export default function LoginPage() {
       minHeight: "100vh", background: "linear-gradient(135deg, #002452 0%, #00696d 100%)",
       display: "flex", alignItems: "center", justifyContent: "center", padding: 20,
     }}>
+      {/* Dark mode toggle */}
+      <button onClick={toggle} style={{
+        position: "absolute", top: 20, right: 20,
+        padding: 8, borderRadius: 10, border: "none", cursor: "pointer",
+        background: "rgba(255,255,255,0.15)", color: "white",
+      }}>
+        <Icon name={isDark ? "light_mode" : "dark_mode"} size={20} color="white" />
+      </button>
+
       <div style={{
-        background: "white", borderRadius: 24, padding: "40px 36px", width: "100%", maxWidth: 420,
-        boxShadow: "0 24px 60px rgba(0,36,82,0.28)",
+        background: isDark ? "rgba(22,28,42,0.95)" : "white", borderRadius: 24, padding: "40px 36px", width: "100%", maxWidth: 420,
+        boxShadow: isDark
+          ? "0 24px 60px rgba(0,0,0,0.4)"
+          : "0 24px 60px rgba(0,36,82,0.28)",
+        transition: "background 0.3s, box-shadow 0.3s",
       }}>
         {/* Logo */}
         <div style={{ textAlign: "center", marginBottom: 32 }}>
-          <div style={{
-            width: 56, height: 56, borderRadius: 16, background: "linear-gradient(135deg,#002452,#00696d)",
-            display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px",
-          }}>
-            <Icon name="folder_special" size={28} color="white" />
-          </div>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            31st File ERP
-          </h1>
-          <p style={{ fontSize: 13, color: "#747780", marginTop: 4, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <img
+            src={"/blue-logo.png"}
+            alt="31st File"
+            style={{ height: 48, width: "auto", objectFit: "contain", marginBottom: 14 }}
+          />
+          <p style={{ fontSize: 13, color: isDark ? "#8b8f9e" : "#747780", marginTop: 4, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Sign in to your account
           </p>
         </div>
 
         {error && (
           <div style={{
-            padding: "10px 14px", borderRadius: 10, background: "rgba(255,218,214,0.7)",
+            padding: "10px 14px", borderRadius: 10, background: isDark ? "rgba(186,26,26,0.15)" : "rgba(255,218,214,0.7)",
             borderLeft: "4px solid #ba1a1a", display: "flex", alignItems: "center", gap: 8, marginBottom: 20,
           }}>
             <Icon name="error" size={16} color="#ba1a1a" />
@@ -74,25 +85,25 @@ export default function LoginPage() {
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#44474f", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", display: "block", marginBottom: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: isDark ? "#a0a4b2" : "#44474f", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", display: "block", marginBottom: 6 }}>
               Email
             </label>
             <input
               type="email" required autoComplete="email"
-              style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", border: "1.5px solid #c4c6d0", borderRadius: 10, fontSize: 14, fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", color: "#131c2a" }}
+              style={{ width: "100%", boxSizing: "border-box", padding: "11px 14px", border: "1.5px solid var(--input-border)", borderRadius: 10, fontSize: 14, fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", color: "var(--text-body)", background: "var(--bg-input)" }}
               placeholder="you@example.com"
               value={form.email}
               onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
             />
           </div>
           <div>
-            <label style={{ fontSize: 12, fontWeight: 600, color: "#44474f", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", display: "block", marginBottom: 6 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: isDark ? "#a0a4b2" : "#44474f", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", display: "block", marginBottom: 6 }}>
               Password
             </label>
             <div style={{ position: "relative" }}>
               <input
                 type={showPw ? "text" : "password"} required autoComplete="current-password"
-                style={{ width: "100%", boxSizing: "border-box", padding: "11px 44px 11px 14px", border: "1.5px solid #c4c6d0", borderRadius: 10, fontSize: 14, fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", color: "#131c2a" }}
+                style={{ width: "100%", boxSizing: "border-box", padding: "11px 44px 11px 14px", border: "1.5px solid var(--input-border)", borderRadius: 10, fontSize: 14, fontFamily: "'Plus Jakarta Sans',sans-serif", outline: "none", color: "var(--text-body)", background: "var(--bg-input)" }}
                 placeholder="Enter password"
                 value={form.password}
                 onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
@@ -101,7 +112,7 @@ export default function LoginPage() {
                 position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)",
                 background: "none", border: "none", cursor: "pointer", padding: 0,
               }}>
-                <Icon name={showPw ? "visibility_off" : "visibility"} size={18} color="#747780" />
+                <Icon name={showPw ? "visibility_off" : "visibility"} size={18} color="var(--text-muted)" />
               </button>
             </div>
           </div>
@@ -116,7 +127,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p style={{ textAlign: "center", fontSize: 12, color: "#747780", marginTop: 24, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+        <p style={{ textAlign: "center", fontSize: 12, color: "var(--text-muted)", marginTop: 24, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
           Contact your administrator for access
         </p>
       </div>

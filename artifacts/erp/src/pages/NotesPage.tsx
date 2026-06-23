@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useState } from "react";
 
 function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
@@ -26,18 +27,18 @@ export default function NotesPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-        <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(27,58,107,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-          <Icon name="description" size={24} color="#1b3a6b" />
+        <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--bg-icon)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+          <Icon name="description" size={24} color="var(--text-primary)" />
         </div>
         <div>
-          <h1 style={{ fontSize: 20, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Notes to Accounts
           </h1>
-          <p style={{ fontSize: 12, color: "#747780", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Forming part of the Financial Statements
           </p>
         </div>
-        <button onClick={() => window.print()} style={{ padding: 8, borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "#747780", marginLeft: "auto" }}>
+        <button onClick={() => window.print()} style={{ padding: 8, borderRadius: 8, background: "none", border: "none", cursor: "pointer", color: "var(--text-muted)", marginLeft: "auto" }}>
           <Icon name="print" size={22} />
         </button>
       </div>
@@ -50,19 +51,19 @@ export default function NotesPage() {
               style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "14px 16px", background: "none", border: "none", cursor: "pointer", textAlign: "left" }}>
               <span style={{
                 width: 32, height: 32, borderRadius: 10, flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center",
-                background: expanded === note.no ? "#1b3a6b" : "rgba(27,58,107,0.10)",
-                color: expanded === note.no ? "white" : "#1b3a6b",
+                background: expanded === note.no ? "var(--text-primary)" : "var(--bg-icon)",
+                color: expanded === note.no ? "white" : "var(--text-primary)",
                 fontFamily: "'JetBrains Mono',monospace", fontSize: 13, fontWeight: 700,
               }}>{note.no}</span>
-              <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 {note.title}
               </span>
-              <Icon name="expand_more" size={18} color="#747780"
+              <Icon name="expand_more" size={18} color="var(--text-muted)"
                 style={{ transform: expanded === note.no ? "rotate(180deg)" : "rotate(0)", transition: "transform 0.2s" } as any} />
             </button>
             {expanded === note.no && (
               <div style={{ padding: "0 16px 16px 60px" }}>
-                <p style={{ fontSize: 13, color: "#44474f", lineHeight: 1.7, fontFamily: "'Plus Jakarta Sans',sans-serif", whiteSpace: "pre-line" }}>
+                <p style={{ fontSize: 13, color: "var(--text-muted-2)", lineHeight: 1.7, fontFamily: "'Plus Jakarta Sans',sans-serif", whiteSpace: "pre-line" }}>
                   {note.content}
                 </p>
               </div>

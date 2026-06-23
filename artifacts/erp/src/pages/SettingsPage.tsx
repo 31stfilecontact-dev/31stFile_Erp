@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useState, type CSSProperties } from "react";
 
 function Icon({ name, size = 20, color = "", style }: { name: string; size?: number; color?: string; style?: CSSProperties }) {
@@ -56,7 +57,7 @@ export default function SettingsPage() {
             value={pwForm[field]} onChange={e => setPwForm(p => ({ ...p, [field]: e.target.value }))} />
           <button type="button" onClick={() => setShowPw(p => ({ ...p, [field]: !p[field] }))}
             style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
-            <Icon name={showPw[field] ? "visibility_off" : "visibility"} size={18} color="#747780" />
+            <Icon name={showPw[field] ? "visibility_off" : "visibility"} size={18} color="var(--text-muted)" />
           </button>
         </div>
       </div>
@@ -65,13 +66,13 @@ export default function SettingsPage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <h1 style={{ fontSize: 22, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Settings</h1>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Settings</h1>
 
-      <div style={{ display: "flex", gap: 2, background: "rgba(231,238,255,0.6)", borderRadius: 12, padding: 4 }}>
+      <div style={{ display: "flex", gap: 2, background: "var(--bg-hover)", borderRadius: 12, padding: 4 }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
-            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 4px", borderRadius: 8, border: "none", cursor: "pointer", transition: "all 0.15s", background: tab === t.id ? "white" : "transparent", boxShadow: tab === t.id ? "0 2px 8px rgba(27,58,107,0.10)" : "none", color: tab === t.id ? "#00696d" : "#747780" }}>
-            <Icon name={t.icon} size={18} color={tab === t.id ? "#00696d" : "#747780"} />
+            style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 4, padding: "8px 4px", borderRadius: 8, border: "none", cursor: "pointer", transition: "all 0.15s", background: tab === t.id ? "white" : "transparent", boxShadow: tab === t.id ? "0 2px 8px var(--bg-icon)" : "none", color: tab === t.id ? "var(--text-accent)" : "var(--text-muted)" }}>
+            <Icon name={t.icon} size={18} color={tab === t.id ? "var(--text-accent)" : "var(--text-muted)"} />
             <span style={{ fontSize: 10, fontWeight: 700, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{t.label}</span>
           </button>
         ))}
@@ -79,11 +80,11 @@ export default function SettingsPage() {
 
       {tab === "company" && (
         <div className="glass-card p-5 space-y-4">
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Company Profile</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Company Profile</h2>
           {saved && (
-            <div className="glass-card-sm p-3 flex gap-2" style={{ borderLeft: "4px solid #00696d" }}>
-              <Icon name="check_circle" size={18} color="#00696d" />
-              <p style={{ fontSize: 13, color: "#00696d", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Saved successfully!</p>
+            <div className="glass-card-sm p-3 flex gap-2" style={{ borderLeft: "4px solid var(--text-accent)" }}>
+              <Icon name="check_circle" size={18} color="var(--text-accent)" />
+              <p style={{ fontSize: 13, color: "var(--text-accent)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Saved successfully!</p>
             </div>
           )}
           {[
@@ -118,15 +119,15 @@ export default function SettingsPage() {
 
       {tab === "upi" && (
         <div className="glass-card p-5 space-y-4">
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>UPI Auto-Mapping Rules</h2>
-          <p style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>When a UPI transaction merchant/ID contains the keyword, it auto-maps to the selected ledger.</p>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>UPI Auto-Mapping Rules</h2>
+          <p style={{ fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>When a UPI transaction merchant/ID contains the keyword, it auto-maps to the selected ledger.</p>
           <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {rules.map((r, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "rgba(240,243,255,0.7)", borderRadius: 12 }}>
-                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "#1b3a6b", background: "rgba(27,58,107,0.10)", padding: "3px 8px", borderRadius: 6 }}>{r.keyword}</span>
-                <span style={{ fontSize: 12, color: "#44474f", flex: 1, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>→ {r.account}</span>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 14px", background: "var(--bg-hover)", borderRadius: 12 }}>
+                <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "var(--text-primary)", background: "var(--bg-icon)", padding: "3px 8px", borderRadius: 6 }}>{r.keyword}</span>
+                <span style={{ fontSize: 12, color: "var(--text-muted-2)", flex: 1, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>→ {r.account}</span>
                 <button onClick={() => setRules(p => p.map((x, idx) => idx === i ? { ...x, active: !x.active } : x))}
-                  style={{ width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer", transition: "all 0.2s", background: r.active ? "#00696d" : "#c4c6d0", position: "relative", padding: 0 }}>
+                  style={{ width: 36, height: 20, borderRadius: 10, border: "none", cursor: "pointer", transition: "all 0.2s", background: r.active ? "var(--text-accent)" : "var(--input-border)", position: "relative", padding: 0 }}>
                   <span style={{ position: "absolute", top: 2, width: 16, height: 16, borderRadius: 8, background: "white", transition: "all 0.2s", left: r.active ? "calc(100% - 18px)" : 2 } as CSSProperties} />
                 </button>
               </div>
@@ -137,24 +138,24 @@ export default function SettingsPage() {
 
       {tab === "export" && (
         <div className="glass-card p-5 space-y-3">
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Data Export</h2>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Data Export</h2>
           {[
             { label: "Export Trial Balance", icon: "balance", desc: "As at today" },
             { label: "Export P&L Statement", icon: "trending_up", desc: "Full year YTD" },
             { label: "Export Balance Sheet", icon: "account_balance", desc: "As at today" },
             { label: "Export All Transactions", icon: "receipt_long", desc: "Full journal" },
           ].map(item => (
-            <button key={item.label} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: "1px solid rgba(196,198,208,0.5)", background: "white", cursor: "pointer", transition: "all 0.15s", textAlign: "left" }}
-              onMouseEnter={e => (e.currentTarget.style.background = "#f0f3ff")}
+            <button key={item.label} style={{ width: "100%", display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", borderRadius: 12, border: "1px solid var(--bg-card-border)", background: "white", cursor: "pointer", transition: "all 0.15s", textAlign: "left" }}
+              onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-input-hover)")}
               onMouseLeave={e => (e.currentTarget.style.background = "white")}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: "rgba(0,105,109,0.10)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Icon name={item.icon} size={22} color="#00696d" />
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: "var(--bg-chip-s)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name={item.icon} size={22} color="var(--text-accent)" />
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, fontWeight: 600, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.label}</p>
-                <p style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.desc}</p>
+                <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.label}</p>
+                <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{item.desc}</p>
               </div>
-              <Icon name="download" size={20} color="#747780" />
+              <Icon name="download" size={20} color="var(--text-muted)" />
             </button>
           ))}
         </div>
@@ -163,13 +164,13 @@ export default function SettingsPage() {
       {tab === "security" && (
         <div className="glass-card p-5 space-y-5">
           <div>
-            <h2 style={{ fontSize: 16, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Change Password</h2>
-            <p style={{ fontSize: 13, color: "#44474f", marginTop: 4, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Use a strong password with letters, numbers, and symbols.</p>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Change Password</h2>
+            <p style={{ fontSize: 13, color: "var(--text-muted-2)", marginTop: 4, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Use a strong password with letters, numbers, and symbols.</p>
           </div>
           {pwMsg && (
-            <div style={{ padding: "10px 14px", borderRadius: 10, background: pwMsg.ok ? "rgba(220,242,232,0.7)" : "rgba(255,218,214,0.7)", borderLeft: `4px solid ${pwMsg.ok ? "#00696d" : "#ba1a1a"}`, display: "flex", alignItems: "center", gap: 8 }}>
-              <Icon name={pwMsg.ok ? "check_circle" : "error"} size={18} color={pwMsg.ok ? "#00696d" : "#ba1a1a"} />
-              <p style={{ fontSize: 13, color: pwMsg.ok ? "#00696d" : "#ba1a1a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{pwMsg.text}</p>
+            <div style={{ padding: "10px 14px", borderRadius: 10, background: pwMsg.ok ? "var(--bg-hover)" : "var(--bg-card-border)", borderLeft: `4px solid ${pwMsg.ok ? "var(--text-accent)" : "var(--text-danger)"}`, display: "flex", alignItems: "center", gap: 8 }}>
+              <Icon name={pwMsg.ok ? "check_circle" : "error"} size={18} color={pwMsg.ok ? "var(--text-accent)" : "var(--text-danger)"} />
+              <p style={{ fontSize: 13, color: pwMsg.ok ? "var(--text-accent)" : "var(--text-danger)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{pwMsg.text}</p>
             </div>
           )}
           <form onSubmit={changePassword} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -185,8 +186,8 @@ export default function SettingsPage() {
 
       {tab === "accounts" && (
         <div className="glass-card p-5">
-          <h2 style={{ fontSize: 16, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>Account Settings</h2>
-          <p style={{ fontSize: 13, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Manage your chart of accounts structure from the <a href="/accounts" style={{ color: "#00696d" }}>Accounts page</a>.</p>
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>Account Settings</h2>
+          <p style={{ fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Manage your chart of accounts structure from the <a href="/accounts" style={{ color: "var(--text-accent)" }}>Accounts page</a>.</p>
         </div>
       )}
     </div>

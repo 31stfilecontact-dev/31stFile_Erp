@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 
@@ -11,7 +12,7 @@ function Icon({ name, size = 20, color = "" }: { name: string; size?: number; co
 }
 
 const GROUP_COLORS: Record<string, string> = {
-  Assets: "#00696d", Liabilities: "#1b3a6b", Income: "#00696d",
+  Assets: "var(--text-accent)", Liabilities: "var(--text-primary)", Income: "var(--text-accent)",
   Expenses: "#9C6500", Equity: "#5c3d9e",
 };
 
@@ -76,7 +77,7 @@ export default function AccountsPage() {
   return (
     <div className="max-w-3xl mx-auto space-y-4">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
           Chart of Accounts
         </h1>
         <button onClick={() => setShowForm(!showForm)} className="btn-primary" style={{ fontSize: 13 }}>
@@ -87,12 +88,12 @@ export default function AccountsPage() {
       {/* New account form */}
       {showForm && (
         <div className="glass-card p-5">
-          <h2 style={{ fontSize: 15, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 16 }}>
+          <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 16 }}>
             Add Account
           </h2>
           {error && (
-            <div style={{ padding: "8px 12px", borderRadius: 8, background: "rgba(255,218,214,0.7)", borderLeft: "3px solid #ba1a1a", marginBottom: 12 }}>
-              <p style={{ fontSize: 12, color: "#ba1a1a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{error}</p>
+            <div style={{ padding: "8px 12px", borderRadius: 8, background: "var(--bg-card-border)", borderLeft: "3px solid var(--text-danger)", marginBottom: 12 }}>
+              <p style={{ fontSize: 12, color: "var(--text-danger)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{error}</p>
             </div>
           )}
           <form onSubmit={createAccount} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -144,7 +145,7 @@ export default function AccountsPage() {
       {/* Search + filter */}
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
         <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
-          <Icon name="search" size={18} color="#747780" style={{ position: "absolute" as any, left: 12, top: "50%", transform: "translateY(-50%)" } as any} />
+          <Icon name="search" size={18} color="var(--text-muted)" style={{ position: "absolute" as any, left: 12, top: "50%", transform: "translateY(-50%)" } as any} />
           <input type="text" className="input-field" style={{ paddingLeft: 38 }}
             placeholder="Search accounts..." value={search} onChange={e => setSearch(e.target.value)} />
         </div>
@@ -154,9 +155,9 @@ export default function AccountsPage() {
               style={{
                 padding: "8px 14px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer",
                 fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s",
-                background: groupFilter === g ? (GROUP_COLORS[g] || "#1b3a6b") : "transparent",
-                color: groupFilter === g ? "white" : "#747780",
-                border: groupFilter === g ? "none" : "1px solid #c4c6d0",
+                background: groupFilter === g ? (GROUP_COLORS[g] || "var(--text-primary)") : "transparent",
+                color: groupFilter === g ? "white" : "var(--text-muted)",
+                border: groupFilter === g ? "none" : "1px solid var(--input-border)",
               }}>
               {g}
             </button>
@@ -167,11 +168,11 @@ export default function AccountsPage() {
       {/* Account list */}
       {loading ? (
         <div className="glass-card p-12" style={{ textAlign: "center" }}>
-          <Icon name="autorenew" size={40} color="#00696d" />
+          <Icon name="autorenew" size={40} color="var(--text-accent)" />
         </div>
       ) : (
         Object.entries(grouped).map(([group, accts]) => {
-          const color = GROUP_COLORS[group] || "#1b3a6b";
+          const color = GROUP_COLORS[group] || "var(--text-primary)";
           return (
             <div key={group} className="glass-card overflow-hidden">
               <div style={{ padding: "12px 16px", background: `${color}12`, borderBottom: `2px solid ${color}` }}>
@@ -187,27 +188,27 @@ export default function AccountsPage() {
                     textDecoration: "none", transition: "background 0.12s",
                     background: i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.3)",
                   }}
-                    onMouseEnter={e => (e.currentTarget.style.background = "rgba(231,238,255,0.7)")}
+                    onMouseEnter={e => (e.currentTarget.style.background = "var(--bg-hover-strong)")}
                     onMouseLeave={e => (e.currentTarget.style.background = i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.3)")}>
                     <span style={{
                       fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color,
                       background: `${color}18`, padding: "2px 8px", borderRadius: 6, fontWeight: 600, flexShrink: 0,
                     }}>{a.code}</span>
-                    <span style={{ flex: 1, fontSize: 13, color: "#131c2a", fontWeight: 500, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                    <span style={{ flex: 1, fontSize: 13, color: "var(--text-body)", fontWeight: 500, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                       {a.name}
                     </span>
                     {a.subGroup && (
-                      <span style={{ fontSize: 11, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+                      <span style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                         {a.subGroup}
                       </span>
                     )}
                     <span style={{
                       fontSize: 10, padding: "2px 8px", borderRadius: 9999, fontWeight: 700,
                       background: a.normalBal === "DR" ? "rgba(157,240,244,0.4)" : "rgba(255,243,214,0.6)",
-                      color: a.normalBal === "DR" ? "#037074" : "#9C6500",
+                      color: a.normalBal === "DR" ? "var(--text-success)" : "#9C6500",
                       fontFamily: "'Plus Jakarta Sans',sans-serif",
                     }}>{a.normalBal}</span>
-                    <Icon name="chevron_right" size={16} color="#c4c6d0" />
+                    <Icon name="chevron_right" size={16} color="var(--input-border)" />
                   </a>
                 </Link>
               ))}
@@ -218,8 +219,8 @@ export default function AccountsPage() {
 
       {!loading && filtered.length === 0 && (
         <div className="glass-card p-12" style={{ textAlign: "center" }}>
-          <Icon name="account_tree" size={44} color="#c4c6d0" />
-          <p style={{ fontSize: 14, color: "#747780", marginTop: 10, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <Icon name="account_tree" size={44} color="var(--input-border)" />
+          <p style={{ fontSize: 14, color: "var(--text-muted)", marginTop: 10, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             {accounts.length === 0 ? "No accounts yet. Create your first account." : "No accounts match your filter."}
           </p>
         </div>

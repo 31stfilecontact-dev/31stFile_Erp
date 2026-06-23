@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { parseUPICSV, parseUPISMS, type UPITxn } from "@/lib/utils/upi-parser";
 import { inr, fmtDate } from "@/lib/utils/format";
@@ -140,19 +141,19 @@ export default function UPICapturePage() {
     setRules(prev => prev.filter(r => r.id !== id));
   }
 
-  const card: React.CSSProperties = { background: "rgba(255,255,255,0.92)", border: "1px solid rgba(196,198,208,0.35)", borderRadius: 16, boxShadow: "0 2px 16px rgba(0,36,82,0.06)" };
+  const card: React.CSSProperties = { background: "rgba(255,255,255,0.92)", border: "1px solid var(--bg-card-border)", borderRadius: 16, boxShadow: "0 2px 16px var(--bg-card-border)" };
 
   return (
     <div style={{ maxWidth: 900, margin: "0 auto", display: "flex", flexDirection: "column", gap: 18 }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(0,105,109,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-            <Icon name="phone_iphone" size={24} color="#00696d" />
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "var(--bg-chip-s)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <Icon name="phone_iphone" size={24} color="var(--text-accent)" />
           </div>
           <div>
-            <h1 style={{ fontSize: 20, fontWeight: 800, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>UPI Capture</h1>
-            <p style={{ fontSize: 12, color: "#747780", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <h1 style={{ fontSize: 20, fontWeight: 800, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>UPI Capture</h1>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 2, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               Import · Verify · Post to Ledger
             </p>
           </div>
@@ -164,12 +165,12 @@ export default function UPICapturePage() {
 
       {/* Result banner */}
       {result && (
-        <div style={{ padding: "10px 14px", borderRadius: 10, background: result.failed === 0 ? "rgba(220,242,232,0.7)" : "rgba(255,243,214,0.7)", borderLeft: `4px solid ${result.failed === 0 ? "#00696d" : "#9C6500"}`, display: "flex", gap: 8, alignItems: "center" }}>
-          <Icon name={result.failed === 0 ? "check_circle" : "warning"} size={16} color={result.failed === 0 ? "#00696d" : "#9C6500"} />
-          <p style={{ fontSize: 13, fontFamily: "'Plus Jakarta Sans',sans-serif", color: "#131c2a", flex: 1 }}>
+        <div style={{ padding: "10px 14px", borderRadius: 10, background: result.failed === 0 ? "var(--bg-hover)" : "rgba(255,243,214,0.7)", borderLeft: `4px solid ${result.failed === 0 ? "var(--text-accent)" : "#9C6500"}`, display: "flex", gap: 8, alignItems: "center" }}>
+          <Icon name={result.failed === 0 ? "check_circle" : "warning"} size={16} color={result.failed === 0 ? "var(--text-accent)" : "#9C6500"} />
+          <p style={{ fontSize: 13, fontFamily: "'Plus Jakarta Sans',sans-serif", color: "var(--text-body)", flex: 1 }}>
             Posted {result.success} transactions.{result.failed > 0 ? ` ${result.failed} failed (no account assigned?).` : ""}
           </p>
-          <button onClick={() => setResult(null)} style={{ border: "none", background: "none", cursor: "pointer", color: "#747780" }}>
+          <button onClick={() => setResult(null)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-muted)" }}>
             <Icon name="close" size={16} />
           </button>
         </div>
@@ -178,10 +179,10 @@ export default function UPICapturePage() {
       {/* Auto-Rules panel */}
       {showRules && (
         <div style={{ ...card, padding: 18 }}>
-          <h3 style={{ fontSize: 14, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>
+          <h3 style={{ fontSize: 14, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>
             Auto-Classification Rules
           </h3>
-          <p style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>
+          <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 12 }}>
             If a merchant name contains the keyword, the account is auto-assigned on import.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: 8, marginBottom: 12 }}>
@@ -195,14 +196,14 @@ export default function UPICapturePage() {
             </button>
           </div>
           {rules.length === 0 ? (
-            <p style={{ fontSize: 12, color: "#b0b3bf", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No rules yet.</p>
+            <p style={{ fontSize: 12, color: "var(--placeholder)", fontStyle: "italic", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>No rules yet.</p>
           ) : rules.map(r => (
-            <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid rgba(196,198,208,0.2)" }}>
-              <Icon name="rule" size={14} color="#00696d" />
+            <div key={r.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "7px 0", borderBottom: "1px solid var(--bg-card-border)" }}>
+              <Icon name="rule" size={14} color="var(--text-accent)" />
               <span style={{ fontSize: 13, fontFamily: "'JetBrains Mono',monospace", flex: 1 }}>{r.keyword}</span>
-              <span style={{ fontSize: 12, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>→ {r.accountName}</span>
-              <button onClick={() => deleteRule(r.id)} style={{ border: "none", background: "none", cursor: "pointer", color: "#ba1a1a", padding: 2 }}>
-                <Icon name="delete" size={15} color="#ba1a1a" />
+              <span style={{ fontSize: 12, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>→ {r.accountName}</span>
+              <button onClick={() => deleteRule(r.id)} style={{ border: "none", background: "none", cursor: "pointer", color: "var(--text-danger)", padding: 2 }}>
+                <Icon name="delete" size={15} color="var(--text-danger)" />
               </button>
             </div>
           ))}
@@ -210,11 +211,11 @@ export default function UPICapturePage() {
       )}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, background: "rgba(231,238,255,0.6)", borderRadius: 12, padding: 4 }}>
+      <div style={{ display: "flex", gap: 4, background: "var(--bg-hover)", borderRadius: 12, padding: 4 }}>
         {([["sms", "SMS / Text", "sms"], ["csv", "CSV Import", "upload_file"], ["manual", "Manual", "edit"]] as const).map(([id, label, icon]) => (
           <button key={id} onClick={() => setTab(id)}
-            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 4px", borderRadius: 8, border: "none", cursor: "pointer", transition: "all 0.15s", background: tab === id ? "white" : "transparent", boxShadow: tab === id ? "0 2px 8px rgba(27,58,107,0.10)" : "none", fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 600, color: tab === id ? "#00696d" : "#747780" }}>
-            <Icon name={icon} size={18} color={tab === id ? "#00696d" : "#747780"} /> {label}
+            style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 4px", borderRadius: 8, border: "none", cursor: "pointer", transition: "all 0.15s", background: tab === id ? "white" : "transparent", boxShadow: tab === id ? "0 2px 8px var(--bg-icon)" : "none", fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 600, color: tab === id ? "var(--text-accent)" : "var(--text-muted)" }}>
+            <Icon name={icon} size={18} color={tab === id ? "var(--text-accent)" : "var(--text-muted)"} /> {label}
           </button>
         ))}
       </div>
@@ -223,10 +224,10 @@ export default function UPICapturePage() {
       {tab === "sms" && (
         <div style={{ ...card, padding: 20, display: "flex", flexDirection: "column", gap: 12 }}>
           <div>
-            <p style={{ fontSize: 13, fontWeight: 600, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 4 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", marginBottom: 4 }}>
               Paste SMS messages below
             </p>
-            <p style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               Transactions are auto-detected as you type. Supports HDFC, SBI, ICICI, Axis, Paytm, PhonePe, Kotak SMS formats.
             </p>
           </div>
@@ -251,7 +252,7 @@ export default function UPICapturePage() {
         <div style={{ ...card, padding: 24 }}>
           <input ref={fileRef} type="file" accept=".csv" style={{ display: "none" }} onChange={handleCSV} />
           <div
-            style={{ border: "2px dashed rgba(196,198,208,0.6)", borderRadius: 16, padding: 40, textAlign: "center", cursor: "pointer" }}
+            style={{ border: "2px dashed var(--bg-card-border)", borderRadius: 16, padding: 40, textAlign: "center", cursor: "pointer" }}
             onClick={() => fileRef.current?.click()}
             onDragOver={e => e.preventDefault()}
             onDrop={async e => {
@@ -259,11 +260,11 @@ export default function UPICapturePage() {
               const file = e.dataTransfer.files[0];
               if (file) { setLoading(true); stageTransactions(await parseUPICSV(file)); setLoading(false); }
             }}>
-            <Icon name="upload_file" size={44} color="#c4c6d0" />
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#44474f", marginTop: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <Icon name="upload_file" size={44} color="var(--input-border)" />
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-muted-2)", marginTop: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               Drop your bank statement CSV
             </p>
-            <p style={{ fontSize: 12, color: "#747780", marginTop: 4, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               HDFC · SBI · ICICI · Axis · Paytm · PhonePe
             </p>
             <button className="btn-primary" style={{ marginTop: 16, fontSize: 13 }} onClick={e => { e.stopPropagation(); fileRef.current?.click(); }}>
@@ -275,8 +276,8 @@ export default function UPICapturePage() {
 
       {loading && (
         <div style={{ ...card, padding: 48, textAlign: "center" }}>
-          <Icon name="autorenew" size={40} color="#00696d" />
-          <p style={{ fontSize: 13, color: "#747780", marginTop: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Parsing…</p>
+          <Icon name="autorenew" size={40} color="var(--text-accent)" />
+          <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 8, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Parsing…</p>
         </div>
       )}
 
@@ -284,18 +285,18 @@ export default function UPICapturePage() {
       {txns.length > 0 && (
         <div style={{ ...card, overflow: "hidden" }}>
           {/* Table header bar */}
-          <div style={{ padding: "14px 16px", borderBottom: "1px solid rgba(196,198,208,0.3)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
+          <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--bg-card-border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
             <div>
-              <h2 style={{ fontSize: 15, fontWeight: 700, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 {txns.length} Transactions Detected
               </h2>
-              <p style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 Assign accounts, then post selected to ledger.
-                {" "}<span style={{ color: "#00696d", fontWeight: 600 }}>{txns.filter(t => t.matchStatus === "MATCHED").length} auto-matched</span>
+                {" "}<span style={{ color: "var(--text-accent)", fontWeight: 600 }}>{txns.filter(t => t.matchStatus === "MATCHED").length} auto-matched</span>
               </p>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-              <span style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+              <span style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 {selectedCount} selected · {selectedWithAccount.length} ready to post
               </span>
               <button
@@ -313,9 +314,9 @@ export default function UPICapturePage() {
           {/* Column headers */}
           <div style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 160px 100px 70px 60px", gap: 8, padding: "8px 16px", background: "rgba(240,243,255,0.6)", alignItems: "center" }}>
             <input type="checkbox" checked={selectedCount === txns.length} onChange={e => toggleAll(e.target.checked)}
-              style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#00696d" }} />
+              style={{ width: 15, height: 15, cursor: "pointer", accentColor: "var(--text-accent)" }} />
             {["Date", "Merchant / Description", "Account to assign", "Amount", "Type", ""].map((h, i) => (
-              <p key={i} style={{ fontSize: 10, fontWeight: 700, color: "#747780", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: i >= 3 ? "right" : "left", margin: 0 }}>{h}</p>
+              <p key={i} style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: i >= 3 ? "right" : "left", margin: 0 }}>{h}</p>
             ))}
           </div>
 
@@ -325,18 +326,18 @@ export default function UPICapturePage() {
             return (
               <div key={t.id} style={{
                 display: "grid", gridTemplateColumns: "32px 90px 1fr 160px 100px 70px 60px", gap: 8, padding: "10px 16px",
-                borderBottom: "1px solid rgba(196,198,208,0.15)",
+                borderBottom: "1px solid var(--bg-card-border)",
                 background: isMatched ? "rgba(220,242,232,0.18)" : i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.15)",
                 alignItems: "center",
               }}>
                 <input type="checkbox" checked={t.selected} onChange={() => toggleSelect(t.id)}
-                  style={{ width: 15, height: 15, cursor: "pointer", accentColor: "#00696d" }} />
-                <span style={{ fontSize: 12, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{t.date}</span>
+                  style={{ width: 15, height: 15, cursor: "pointer", accentColor: "var(--text-accent)" }} />
+                <span style={{ fontSize: 12, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{t.date}</span>
                 <div style={{ minWidth: 0 }}>
-                  <p style={{ fontSize: 13, color: "#131c2a", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
+                  <p style={{ fontSize: 13, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", fontWeight: 600 }}>
                     {t.merchant}
                   </p>
-                  {t.utr && <p style={{ fontSize: 10, color: "#b0b3bf", fontFamily: "'JetBrains Mono',monospace" }}>UTR: {t.utr}</p>}
+                  {t.utr && <p style={{ fontSize: 10, color: "var(--placeholder)", fontFamily: "'JetBrains Mono',monospace" }}>UTR: {t.utr}</p>}
                 </div>
                 <div>
                   <select
@@ -344,49 +345,49 @@ export default function UPICapturePage() {
                     onChange={e => setAccount(t.id, e.target.value)}
                     style={{
                       width: "100%", padding: "5px 8px", fontSize: 12,
-                      border: `1px solid ${isReady ? "#00696d" : "#c4c6d0"}`,
+                      border: `1px solid ${isReady ? "var(--text-accent)" : "var(--input-border)"}`,
                       borderRadius: 8, fontFamily: "'Plus Jakarta Sans',sans-serif",
-                      background: isMatched ? "rgba(220,242,232,0.4)" : "white",
-                      color: isReady ? "#131c2a" : "#b0b3bf", outline: "none", cursor: "pointer",
+                      background: isMatched ? "var(--bg-hover)" : "white",
+                      color: isReady ? "var(--text-body)" : "var(--placeholder)", outline: "none", cursor: "pointer",
                     }}>
                     <option value="">— Select account —</option>
                     {accounts.map(a => <option key={a.id} value={a.id}>{a.code} · {a.name}</option>)}
                   </select>
                 </div>
-                <p style={{ textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: t.type === "DEBIT" ? "#ba1a1a" : "#00696d", fontWeight: 700 }}>
+                <p style={{ textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: t.type === "DEBIT" ? "var(--text-danger)" : "var(--text-accent)", fontWeight: 700 }}>
                   {inr(t.amount)}
                 </p>
                 <div style={{ textAlign: "right" }}>
                   <span style={{
                     display: "inline-block", fontSize: 10, padding: "3px 7px", borderRadius: 9999, fontWeight: 700,
                     fontFamily: "'Plus Jakarta Sans',sans-serif",
-                    background: t.type === "DEBIT" ? "rgba(255,218,214,0.7)" : "rgba(220,242,232,0.7)",
-                    color: t.type === "DEBIT" ? "#ba1a1a" : "#00696d",
+                    background: t.type === "DEBIT" ? "var(--bg-card-border)" : "var(--bg-hover)",
+                    color: t.type === "DEBIT" ? "var(--text-danger)" : "var(--text-accent)",
                   }}>{t.type}</span>
                 </div>
                 <div style={{ textAlign: "right" }}>
                   {isMatched
-                    ? <span title="Auto-matched by rule"><Icon name="auto_awesome" size={15} color="#00696d" /></span>
-                    : <span style={{ fontSize: 10, color: "#b0b3bf" }}>{t.source}</span>}
+                    ? <span title="Auto-matched by rule"><Icon name="auto_awesome" size={15} color="var(--text-accent)" /></span>
+                    : <span style={{ fontSize: 10, color: "var(--placeholder)" }}>{t.source}</span>}
                 </div>
               </div>
             );
           })}
 
           {txns.length > 100 && (
-            <div style={{ padding: "10px 16px", textAlign: "center", borderTop: "1px solid rgba(196,198,208,0.15)" }}>
-              <p style={{ fontSize: 12, color: "#747780", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <div style={{ padding: "10px 16px", textAlign: "center", borderTop: "1px solid var(--bg-card-border)" }}>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 Showing 100 of {txns.length}. Assign accounts and post in batches.
               </p>
             </div>
           )}
 
           {/* DR/CR guide */}
-          <div style={{ padding: "10px 16px", background: "rgba(240,243,255,0.4)", borderTop: "1px solid rgba(196,198,208,0.15)", display: "flex", gap: 20, flexWrap: "wrap" }}>
-            <span style={{ fontSize: 11, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <div style={{ padding: "10px 16px", background: "rgba(240,243,255,0.4)", borderTop: "1px solid var(--bg-card-border)", display: "flex", gap: 20, flexWrap: "wrap" }}>
+            <span style={{ fontSize: 11, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               <strong>DEBIT:</strong> DR selected account → CR Bank (1002)
             </span>
-            <span style={{ fontSize: 11, color: "#44474f", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+            <span style={{ fontSize: 11, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
               <strong>CREDIT:</strong> DR Bank (1002) → CR selected account
             </span>
           </div>
@@ -395,11 +396,11 @@ export default function UPICapturePage() {
 
       {txns.length === 0 && !loading && tab === "sms" && !smsText && (
         <div style={{ ...card, padding: 48, textAlign: "center" }}>
-          <Icon name="sms" size={44} color="#c4c6d0" />
-          <p style={{ fontSize: 14, fontWeight: 600, color: "#44474f", marginTop: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <Icon name="sms" size={44} color="var(--input-border)" />
+          <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-muted-2)", marginTop: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Paste bank SMS messages above
           </p>
-          <p style={{ fontSize: 12, color: "#b0b3bf", marginTop: 6, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
+          <p style={{ fontSize: 12, color: "var(--placeholder)", marginTop: 6, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
             Transactions are detected automatically — you verify and post.
           </p>
         </div>
