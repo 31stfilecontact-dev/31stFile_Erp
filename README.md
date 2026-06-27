@@ -89,3 +89,27 @@ Go to your GitHub repository -> **Settings** -> **Secrets and variables** -> **A
 4. Click the green **Run workflow** button!
 
 GitHub will automatically SSH into your server, pull the latest code, and spin up the new Docker containers with zero downtime!
+
+---
+
+## 100% Free Hosting (PaaS)
+If you don't have a server and want to host this for absolutely **$0/month**, use this modern distributed architecture:
+
+### 1. Database (Neon.tech)
+1. Go to [Neon.tech](https://neon.tech/) and create a free Serverless Postgres database.
+2. Copy the `DATABASE_URL` they provide you.
+
+### 2. Backend API (Render.com)
+1. Go to [Render.com](https://render.com/), create an account, and click **New -> Blueprint**.
+2. Connect your GitHub repository. Render will read the `render.yaml` file in this repository and automatically configure the Node.js API.
+3. In the Render Dashboard, paste your Neon `DATABASE_URL` into the environment variables.
+4. Copy the public URL Render gives you (e.g., `https://erp-api-xyz.onrender.com`).
+
+### 3. Frontend (Vercel.com)
+1. Edit the file `artifacts/erp/vercel.json` in this repository and replace `YOUR_RENDER_URL` with the actual URL Render gave you in Step 2. Commit and push this change to GitHub.
+2. Go to [Vercel.com](https://vercel.com/) and click **Add New -> Project**.
+3. Connect your GitHub repository.
+4. **Important:** Change the "Root Directory" to `artifacts/erp`.
+5. Click **Deploy**.
+
+Your ERP is now live on the internet, with a free PostgreSQL database, a free Node.js API, and a free globally cached frontend!

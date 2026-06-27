@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: erp-api
+    env: node
+    region: ohio
+    buildCommand: corepack enable && corepack prepare pnpm@latest --activate && pnpm install --frozen-lockfile=false && pnpm --filter @workspace/db build && pnpm --filter @workspace/api-zod build && pnpm --filter api-server build
+    startCommand: cd artifacts/api-server && npm run start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DATABASE_URL
+        sync: false # You will need to manually enter the Neon DB URL in the Render Dashboard
