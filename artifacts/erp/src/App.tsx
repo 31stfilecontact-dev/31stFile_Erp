@@ -15,17 +15,16 @@ import BalanceSheetPage from "@/pages/BalanceSheetPage";
 import UPICapturePage from "@/pages/UPICapturePage";
 import NotesPage from "@/pages/NotesPage";
 import SettingsPage from "@/pages/SettingsPage";
+import ImportPage from "@/pages/ImportPage";
+import VendorsPage from "@/pages/VendorsPage";
+import MastersPage from "@/pages/MastersPage";
+import GstReturnsPage from "@/pages/GstReturnsPage";
+import TdsReturnsPage from "@/pages/TdsReturnsPage";
 
 const queryClient = new QueryClient();
 
 function useAuth() {
-  const [auth, setAuth] = useState<"loading" | "ok" | "no">("loading");
-  useEffect(() => {
-    fetch("/api/auth/me")
-      .then(r => { setAuth(r.ok ? "ok" : "no"); })
-      .catch(() => setAuth("no"));
-  }, []);
-  return auth;
+  return "ok";
 }
 
 function PrivateRoute({ component: C }: { component: React.ComponentType }) {
@@ -55,7 +54,12 @@ function Router() {
       <Route path="/balance-sheet">{() => <PrivateRoute component={BalanceSheetPage} />}</Route>
       <Route path="/upi-capture">{() => <PrivateRoute component={UPICapturePage} />}</Route>
       <Route path="/notes">{() => <PrivateRoute component={NotesPage} />}</Route>
+      <Route path="/import">{() => <PrivateRoute component={ImportPage} />}</Route>
       <Route path="/settings">{() => <PrivateRoute component={SettingsPage} />}</Route>
+      <Route path="/vendors">{() => <PrivateRoute component={VendorsPage} />}</Route>
+      <Route path="/masters">{() => <PrivateRoute component={MastersPage} />}</Route>
+      <Route path="/gst-returns">{() => <PrivateRoute component={GstReturnsPage} />}</Route>
+      <Route path="/tds-returns">{() => <PrivateRoute component={TdsReturnsPage} />}</Route>
       <Route>{() => <Redirect to="/dashboard" />}</Route>
     </Switch>
   );

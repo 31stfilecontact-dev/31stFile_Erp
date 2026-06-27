@@ -40,7 +40,7 @@ router.get("/accounts/:code/ledger", requireAuth, async (req, res) => {
     const { code } = req.params;
     const { from, to } = req.query as { from?: string; to?: string };
 
-    const [account] = await db.select().from(accounts).where(eq(accounts.code, code));
+    const [account] = await db.select().from(accounts).where(eq(accounts.code, code as string));
     if (!account) return res.status(404).json({ error: "Account not found" });
 
     const normalBal = account.normalBal || "DR";

@@ -2,6 +2,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { inr } from "@/lib/utils/format";
 import { Link } from "wouter";
+import { exportToExcel, exportToPDF } from "@/lib/utils/export";
 
 function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
   return (
@@ -37,7 +38,7 @@ export default function PLStatementPage() {
     const params = new URLSearchParams({ period });
     if (period === "ytd") params.set("fy", fy);
     fetch(`/api/reports/pl?${params}`)
-      .then(r => r.json()).then(setData).finally(() => setLoading(false));
+      .then(r => r.ok ? r.json() : null).then(d => d && setData(d)).catch(() => {}).finally(() => setLoading(false));
   }, [period, fy]);
 
   const pl = data || { income: [], expenses: [], grossIncome: 0, totalExpenses: 0, netProfit: 0 };
@@ -63,20 +64,62 @@ export default function PLStatementPage() {
       </div>
 
       {/* Period & FY controls */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        <div style={{ display: "flex", gap: 6 }}>
-          {([["month", "This Month"], ["ytd", "Full Year"]] as const).map(([v, l]) => (
-            <button key={v} onClick={() => setPeriod(v)}
-              style={{ padding: "7px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s", background: period === v ? "var(--text-accent)" : "transparent", color: period === v ? "white" : "var(--text-muted)", border: period === v ? "none" : "1px solid var(--input-border)" }}>
-              {l}
-            </button>
-          ))}
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", gap: 6 }}>
+            {([["month", "This Month"], ["ytd", "Full Year"]] as const).map(([v, l]) => (
+              <button key={v} onClick={() => setPeriod(v)}
+                style={{ padding: "7px 16px", borderRadius: 9999, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s", background: period === v ? "var(--text-accent)" : "transparent", color: period === v ? "white" : "var(--text-muted)", border: period === v ? "none" : "1px solid var(--input-border)" }}>
+                {l}
+              </button>
+            ))}
+          </div>
+          {period === "ytd" && (
+            <select className="input-field" style={{ fontSize: 13, width: "auto", minWidth: 140 }} value={fy} onChange={e => setFy(e.target.value)}>
+              {fyOptions().map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          )}
         </div>
-        {period === "ytd" && (
-          <select className="input-field" style={{ fontSize: 13, width: "auto", minWidth: 140 }} value={fy} onChange={e => setFy(e.target.value)}>
-            {fyOptions().map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-          </select>
-        )}
+        <div style={{ display: "flex", gap: 8 }}>
+          <button 
+            onClick={() => {
+              const dataToExport = [
+                ["INCOME", ""],
+                ...(pl.income?.map((i: any) => [i.name, i.amount]) || []),
+                ["GROSS INCOME", pl.grossIncome],
+                ["", ""],
+                ["EXPENSES", ""],
+                ...(pl.expenses?.map((e: any) => [e.name, e.amount]) || []),
+                ["TOTAL EXPENSES", pl.totalExpenses],
+                ["", ""],
+                [isProfit ? "NET PROFIT" : "NET LOSS", Math.abs(pl.netProfit)]
+              ];
+              exportToPDF("pl_statement", `Profit & Loss Statement (${data?.from || ''} to ${data?.to || ''})`, ["Account", "Amount"], dataToExport);
+            }} 
+            className="btn-outline" style={{ fontSize: 12 }}
+          >
+            <Icon name="picture_as_pdf" size={16} /> PDF
+          </button>
+          <button 
+            onClick={() => {
+              const dataToExport = [
+                ["INCOME", ""],
+                ...(pl.income?.map((i: any) => [i.name, i.amount]) || []),
+                ["GROSS INCOME", pl.grossIncome],
+                ["", ""],
+                ["EXPENSES", ""],
+                ...(pl.expenses?.map((e: any) => [e.name, e.amount]) || []),
+                ["TOTAL EXPENSES", pl.totalExpenses],
+                ["", ""],
+                [isProfit ? "NET PROFIT" : "NET LOSS", Math.abs(pl.netProfit)]
+              ];
+              exportToExcel("pl_statement", ["Account", "Amount"], dataToExport);
+            }} 
+            className="btn-primary" style={{ fontSize: 12 }}
+          >
+            <Icon name="table_view" size={16} color="white" /> Excel
+          </button>
+        </div>
       </div>
 
       {loading ? (

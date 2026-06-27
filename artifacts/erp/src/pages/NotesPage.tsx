@@ -1,10 +1,10 @@
 import { useTheme } from "@/context/ThemeContext";
 import { useState } from "react";
 
-function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
+function Icon({ name, size = 20, color = "", style }: { name: string; size?: number; color?: string; style?: React.CSSProperties }) {
   return (
     <span className="material-symbols-outlined select-none"
-      style={{ fontSize: size, lineHeight: 1, color: color || "inherit" }}>
+      style={{ fontSize: size, lineHeight: 1, color: color || "inherit", ...style }}>
       {name}
     </span>
   );

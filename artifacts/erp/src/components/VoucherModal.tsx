@@ -34,7 +34,7 @@ export default function VoucherModal({ entryId, onClose }: { entryId: string | n
     if (!entryId) { setVoucher(null); return; }
     setLoading(true);
     fetch(`/api/entries/${entryId}`)
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : null)
       .then(setVoucher)
       .catch(() => setVoucher(null))
       .finally(() => setLoading(false));

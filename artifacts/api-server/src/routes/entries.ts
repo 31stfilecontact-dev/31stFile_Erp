@@ -63,7 +63,7 @@ router.get("/entries", requireAuth, async (_req, res) => {
 
 router.get("/entries/:id", requireAuth, async (req, res) => {
   try {
-    const [entry] = await db.select().from(entries).where(eq(entries.id, req.params.id));
+    const [entry] = await db.select().from(entries).where(eq(entries.id, req.params.id as string));
     if (!entry) return res.status(404).json({ error: "Entry not found" });
 
     const lines = await db
@@ -105,7 +105,7 @@ router.post("/entries", requireAuth, async (req, res) => {
       narration, reference: reference || null, status: "posted",
     }).returning();
 
-    const lineRows = [];
+    const lineRows: any[] = [];
     for (const l of lines) {
       if (l.accountId) {
         const [acct] = await db.select().from(accounts).where(eq(accounts.id, l.accountId));
@@ -144,7 +144,7 @@ router.post("/entries/upi-batch", requireAuth, async (req, res) => {
 
   for (const txn of transactions) {
     try {
-      let ledgerAcc = null;
+      let ledgerAcc: any = null;
       if (txn.accountId) {
         [ledgerAcc] = await db.select().from(accounts).where(eq(accounts.id, txn.accountId));
       } else if (txn.accountCode) {
@@ -167,7 +167,7 @@ router.post("/entries/upi-batch", requireAuth, async (req, res) => {
         reference: txn.utr || null, status: "posted",
       }).returning();
 
-      const lines = isDebit
+      const lines: any[] = isDebit
         ? [
             { id: randomUUID(), entryId: entry.id, accountId: ledgerAcc.id, side: "DR", amount: txn.amount.toString(), note: null },
             { id: randomUUID(), entryId: entry.id, accountId: bankAcc.id, side: "CR", amount: txn.amount.toString(), note: null },

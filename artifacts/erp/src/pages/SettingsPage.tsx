@@ -1,5 +1,5 @@
 import { useTheme } from "@/context/ThemeContext";
-import { useState, type CSSProperties } from "react";
+import { useState, useEffect, type CSSProperties } from "react";
 
 function Icon({ name, size = 20, color = "", style }: { name: string; size?: number; color?: string; style?: CSSProperties }) {
   return (
@@ -14,6 +14,7 @@ const TABS = [
   { id: "company", label: "Company", icon: "business" },
   { id: "accounts", label: "Accounts", icon: "account_tree" },
   { id: "upi", label: "UPI Rules", icon: "phone_iphone" },
+  { id: "users", label: "Team", icon: "group" },
   { id: "export", label: "Export", icon: "download" },
   { id: "security", label: "Security", icon: "lock" },
 ];
@@ -22,6 +23,8 @@ export default function SettingsPage() {
   const [tab, setTab] = useState("company");
   const [company, setCompany] = useState({ name: "My Company", pan: "", gstin: "", address: "", state: "", fy: "2025-26", type: "Proprietorship" });
   const [saved, setSaved] = useState(false);
+  const [users, setUsers] = useState<any[]>([]);
+  const [newUser, setNewUser] = useState({ name: "", email: "", password: "", role: "accountant" });
   const [rules, setRules] = useState([
     { keyword: "rent", account: "Rent Expense", active: true },
     { keyword: "salary", account: "Salary & Wages", active: true },
@@ -32,7 +35,28 @@ export default function SettingsPage() {
   const [pwMsg, setPwMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const [showPw, setShowPw] = useState({ current: false, next: false, confirm: false });
 
+  useEffect(() => {
+    if (tab === "users") {
+      fetch("/api/users").then(r => r.ok ? r.json() : null).then(d => d && setUsers(d)).catch(() => {});
+    }
+  }, [tab]);
+
   function saveCompany() { setSaved(true); setTimeout(() => setSaved(false), 3000); }
+
+  async function handleAddUser(e: React.FormEvent) {
+    e.preventDefault();
+    try {
+      const res = await fetch("/api/users", {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newUser)
+      });
+      if (res.ok) {
+        const u = await res.json();
+        setUsers(p => [...p, u]);
+        setNewUser({ name: "", email: "", password: "", role: "accountant" });
+      }
+    } catch {}
+  }
 
   async function changePassword(e: React.FormEvent) {
     e.preventDefault(); setPwMsg(null);
@@ -132,6 +156,45 @@ export default function SettingsPage() {
                 </button>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {tab === "users" && (
+        <div className="glass-card p-5 space-y-5">
+          <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>Team & Access Control</h2>
+          <div style={{ background: "var(--bg-hover)", borderRadius: 12, overflow: "hidden" }}>
+            <table style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+              <thead>
+                <tr>
+                  <th style={{ padding: "10px 14px", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", borderBottom: "1px solid var(--bg-card-border)" }}>Name</th>
+                  <th style={{ padding: "10px 14px", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", borderBottom: "1px solid var(--bg-card-border)" }}>Email</th>
+                  <th style={{ padding: "10px 14px", fontSize: 11, fontWeight: 700, color: "var(--text-muted)", borderBottom: "1px solid var(--bg-card-border)" }}>Role</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map(u => (
+                  <tr key={u.id} style={{ borderBottom: "1px solid var(--bg-card-border)" }}>
+                    <td style={{ padding: "10px 14px", fontSize: 13, color: "var(--text-body)" }}>{u.name}</td>
+                    <td style={{ padding: "10px 14px", fontSize: 13, color: "var(--text-muted)" }}>{u.email}</td>
+                    <td style={{ padding: "10px 14px" }}><span style={{ fontSize: 11, padding: "2px 8px", borderRadius: 9999, background: "var(--badge-bg)", color: "var(--text-accent)" }}>{u.role}</span></td>
+                  </tr>
+                ))}
+                {users.length === 0 && (
+                  <tr><td colSpan={3} style={{ padding: "20px", textAlign: "center", fontSize: 13, color: "var(--text-muted)" }}>No users loaded.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <div style={{ padding: "16px", borderRadius: 12, border: "1px solid var(--bg-card-border)" }}>
+            <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>Invite New User</h3>
+            <form onSubmit={handleAddUser} style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+              <div><label className="label-field">Name</label><input required className="input-field" value={newUser.name} onChange={e => setNewUser(p => ({ ...p, name: e.target.value }))} /></div>
+              <div><label className="label-field">Email</label><input required type="email" className="input-field" value={newUser.email} onChange={e => setNewUser(p => ({ ...p, email: e.target.value }))} /></div>
+              <div><label className="label-field">Role</label><select className="input-field" value={newUser.role} onChange={e => setNewUser(p => ({ ...p, role: e.target.value }))}><option value="admin">Admin</option><option value="accountant">Accountant</option><option value="auditor">Auditor</option></select></div>
+              <div><label className="label-field">Temporary Password</label><input required type="text" className="input-field" value={newUser.password} onChange={e => setNewUser(p => ({ ...p, password: e.target.value }))} /></div>
+              <div style={{ gridColumn: "1 / -1", marginTop: 8 }}><button type="submit" className="btn-primary"><Icon name="person_add" size={16} /> Add User</button></div>
+            </form>
           </div>
         </div>
       )}

@@ -1,0 +1,37 @@
+FROM node:20-alpine AS builder
+
+# Install pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+# Copy the entire workspace
+COPY . .
+
+# Install dependencies (respecting pnpm-workspace.yaml)
+RUN pnpm install --frozen-lockfile=false
+
+# Build the shared packages and the API server
+RUN pnpm --filter @workspace/db build
+RUN pnpm --filter @workspace/api-zod build
+RUN pnpm --filter api-server build
+
+# Production image
+FROM node:20-alpine
+
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+WORKDIR /app
+
+COPY --from=builder /app /app
+
+WORKDIR /app/artifacts/api-server
+
+ENV NODE_ENV=production
+ENV PORT=3000
+
+EXPOSE 3000
+
+# We use ts-node to run index.ts, or we can compile it and run node dist/index.js
+# Since we already ran `pnpm build` (which ran tsc), let's run the compiled output.
+CMD ["npm", "run", "start"]

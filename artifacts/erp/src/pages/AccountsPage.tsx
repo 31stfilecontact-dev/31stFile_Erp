@@ -2,10 +2,10 @@ import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { Link } from "wouter";
 
-function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
+function Icon({ name, size = 20, color = "", style }: { name: string; size?: number; color?: string; style?: React.CSSProperties }) {
   return (
     <span className="material-symbols-outlined select-none"
-      style={{ fontSize: size, lineHeight: 1, color: color || "inherit" }}>
+      style={{ fontSize: size, lineHeight: 1, color: color || "inherit", ...style }}>
       {name}
     </span>
   );
@@ -34,7 +34,7 @@ export default function AccountsPage() {
   function load() {
     setLoading(true);
     fetch("/api/accounts")
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : null)
       .then(d => setAccounts(Array.isArray(d) ? d : []))
       .catch(() => {})
       .finally(() => setLoading(false));

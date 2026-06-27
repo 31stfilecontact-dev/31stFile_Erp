@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { fmtDate, inr } from "@/lib/utils/format";
 import VoucherModal from "@/components/VoucherModal";
+import { exportToExcel, exportToPDF } from "@/lib/utils/export";
 
 function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
   return (
@@ -25,7 +26,7 @@ export default function TransactionsPage() {
   const [voucherId, setVoucherId] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch("/api/entries").then(r => r.json())
+    fetch("/api/entries").then(r => r.ok ? r.json() : null)
       .then(d => { setEntries(Array.isArray(d) ? d : []); setLoading(false); })
       .catch(() => setLoading(false));
   }, []);
@@ -62,17 +63,53 @@ export default function TransactionsPage() {
           placeholder="Search narration, voucher no..." value={search} onChange={e => setSearch(e.target.value)} />
       </div>
 
-      <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-        {TYPES.map(f => (
-          <button key={f} onClick={() => setFilter(f)}
-            style={{
-              padding: "5px 14px", borderRadius: 9999, fontSize: 11, fontWeight: 700, cursor: "pointer",
-              fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s",
-              background: filter === f ? "var(--text-accent)" : "transparent",
-              color: filter === f ? "white" : "var(--text-muted)",
-              border: filter === f ? "none" : "1px solid var(--input-border)",
-            }}>{f}</button>
-        ))}
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+          {TYPES.map(f => (
+            <button key={f} onClick={() => setFilter(f)}
+              style={{
+                padding: "5px 14px", borderRadius: 9999, fontSize: 11, fontWeight: 700, cursor: "pointer",
+                fontFamily: "'Plus Jakarta Sans',sans-serif", transition: "all 0.15s",
+                background: filter === f ? "var(--text-accent)" : "transparent",
+                color: filter === f ? "white" : "var(--text-muted)",
+                border: filter === f ? "none" : "1px solid var(--input-border)",
+              }}>{f}</button>
+          ))}
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button 
+            onClick={() => {
+              const dataToExport = filtered.map(e => [
+                e.entryDate ? fmtDate(e.entryDate) : "—",
+                e.voucherNo,
+                e.voucherType,
+                e.narration,
+                e.reference || "—",
+                totalDr(e.lines)
+              ]);
+              exportToPDF("transactions", `Transactions (${filter})`, ["Date", "Voucher No", "Type", "Narration", "Ref", "Amount"], dataToExport);
+            }} 
+            className="btn-outline" style={{ fontSize: 12, padding: "5px 10px" }}
+          >
+            <Icon name="picture_as_pdf" size={16} /> PDF
+          </button>
+          <button 
+            onClick={() => {
+              const dataToExport = filtered.map(e => [
+                e.entryDate ? fmtDate(e.entryDate) : "—",
+                e.voucherNo,
+                e.voucherType,
+                e.narration,
+                e.reference || "—",
+                totalDr(e.lines)
+              ]);
+              exportToExcel("transactions", ["Date", "Voucher No", "Type", "Narration", "Ref", "Amount"], dataToExport);
+            }} 
+            className="btn-primary" style={{ fontSize: 12, padding: "5px 10px" }}
+          >
+            <Icon name="table_view" size={16} color="white" /> Excel
+          </button>
+        </div>
       </div>
 
       <div className="glass-card overflow-hidden">

@@ -5,6 +5,7 @@ import accountsRouter from "./accounts";
 import entriesRouter from "./entries";
 import reportsRouter from "./reports";
 import upiRouter from "./upi";
+import usersRouter from "./users";
 
 const router: IRouter = Router();
 
@@ -14,5 +15,6 @@ router.use(accountsRouter);
 router.use(entriesRouter);
 router.use(reportsRouter);
 router.use(upiRouter);
+router.use(usersRouter);
 
 export default router;

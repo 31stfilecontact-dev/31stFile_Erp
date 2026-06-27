@@ -14,8 +14,8 @@ function getSecret(): Uint8Array {
   return new TextEncoder().encode(s);
 }
 
-async function signToken(userId: string) {
-  return await new SignJWT({ sub: userId })
+async function signToken(userId: string, role: string) {
+  return await new SignJWT({ sub: userId, role })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
     .sign(getSecret());
@@ -28,10 +28,21 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
     const { payload } = await jwtVerify(token, getSecret());
     if (!payload.sub) return res.status(401).json({ error: "Invalid token" });
     (req as any).userId = payload.sub;
+    (req as any).userRole = payload.role;
     next();
   } catch {
     return res.status(401).json({ error: "Invalid or expired token" });
   }
+}
+
+export function requireRole(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const role = (req as any).userRole;
+    if (!role || !allowedRoles.includes(role)) {
+      return res.status(403).json({ error: "Forbidden: insufficient permissions" });
+    }
+    next();
+  };
 }
 
 router.post("/auth/login", async (req, res) => {
@@ -45,7 +56,7 @@ router.post("/auth/login", async (req, res) => {
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) return res.status(401).json({ error: "Invalid email or password" });
 
-    const token = await signToken(user.id);
+    const token = await signToken(user.id, user.role);
     const isProduction = process.env.NODE_ENV === "production";
     res.cookie(COOKIE, token, {
       httpOnly: true,

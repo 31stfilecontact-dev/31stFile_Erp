@@ -1,0 +1,44 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: erp-db
+    restart: always
+    environment:
+      POSTGres_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-erp_db}
+    ports:
+      - "5432:5432" # Exposed to host for local debugging per user request
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    container_name: erp-api
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - DATABASE_URL=postgres://${DB_USER:-postgres}:${DB_PASSWORD:-postgres}@db:5432/${DB_NAME:-erp_db}
+      - JWT_SECRET=${JWT_SECRET:-supersecretkey}
+    depends_on:
+      - db
+    # We do not expose port 3000 to the host since the web proxy handles it
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    container_name: erp-web
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

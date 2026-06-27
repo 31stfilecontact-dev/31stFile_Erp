@@ -12,7 +12,7 @@ function Icon({ name, size = 20, color = "" }: { name: string; size?: number; co
   );
 }
 
-type Tab = "csv" | "sms" | "manual";
+type Tab = "csv" | "sms" | "manual" | "pending";
 
 interface StagedTxn extends UPITxn {
   accountId?: string;
@@ -35,9 +35,23 @@ function applyRules(txns: StagedTxn[], rules: Rule[]): StagedTxn[] {
   });
 }
 
+interface DBStagedTxn {
+  id: string;
+  source: string;
+  date: string;
+  merchant: string;
+  amount: number;
+  type: string;
+  utr: string | null;
+  accountId: string | null;
+  vendorId: string | null;
+  pendingApproval: boolean;
+}
+
 export default function UPICapturePage() {
   const [tab, setTab] = useState<Tab>("sms");
   const [txns, setTxns] = useState<StagedTxn[]>([]);
+  const [pendingTxns, setPendingTxns] = useState<(DBStagedTxn & { selected?: boolean })[]>([]);
   const [smsText, setSmsText] = useState("");
   const [loading, setLoading] = useState(false);
   const [posting, setPosting] = useState(false);
@@ -50,14 +64,37 @@ export default function UPICapturePage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/upi/accounts").then(r => r.json()).then(setAccounts).catch(() => {});
-    fetch("/api/upi/rules").then(r => r.json()).then(setRules).catch(() => {});
+    fetch("/api/upi/accounts").then(r => r.ok ? r.json() : null).then(setAccounts).catch(() => {});
+    fetch("/api/upi/rules").then(r => r.ok ? r.json() : null).then(setRules).catch(() => {});
+    fetchPending();
   }, []);
 
-  const stageTransactions = useCallback((parsed: UPITxn[]) => {
+  async function fetchPending() {
+    try {
+      const res = await fetch("/api/upi/staging?status=pending");
+      if (res.ok) {
+        const data = await res.json();
+        setPendingTxns(data.map((d: any) => ({ ...d, selected: false })));
+      }
+    } catch (err) {}
+  }
+
+  const stageTransactions = useCallback(async (parsed: UPITxn[]) => {
     const staged: StagedTxn[] = parsed.map(t => ({ ...t, selected: true }));
     const withRules = applyRules(staged, rules);
-    setTxns(withRules);
+    
+    // Send to backend bulk API
+    try {
+      await fetch("/api/upi/staging/bulk", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ transactions: withRules }),
+      });
+      fetchPending();
+      setTab("pending"); // Switch to pending tab
+    } catch (err) {
+      console.error(err);
+    }
   }, [rules]);
 
   async function handleCSV(e: React.ChangeEvent<HTMLInputElement>) {
@@ -65,7 +102,7 @@ export default function UPICapturePage() {
     if (!file) return;
     setLoading(true);
     const parsed = await parseUPICSV(file);
-    stageTransactions(parsed);
+    await stageTransactions(parsed);
     setLoading(false);
   }
 
@@ -92,30 +129,27 @@ export default function UPICapturePage() {
   }
 
   function toggleAll(val: boolean) {
-    setTxns(prev => prev.map(t => ({ ...t, selected: val })));
+    setPendingTxns(prev => prev.map(t => ({ ...t, selected: val })));
   }
 
-  const selectedWithAccount = txns.filter(t => t.selected && t.accountId);
-  const selectedCount = txns.filter(t => t.selected).length;
+  const selectedWithAccount = pendingTxns.filter(t => t.selected && t.accountId);
+  const selectedCount = pendingTxns.filter(t => t.selected).length;
 
   async function postSelected() {
     if (!selectedWithAccount.length) return;
     setPosting(true);
     try {
-      const res = await fetch("/api/entries/upi-batch", {
+      const res = await fetch("/api/upi/staging/approve-batch", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          transactions: selectedWithAccount.map(t => ({
-            ...t,
-            accountId: t.accountId,
-          })),
+          ids: selectedWithAccount.map(t => t.id)
         }),
       });
       const data = await res.json();
       setResult(data);
       if (res.ok) {
-        setTxns(prev => prev.filter(t => !selectedWithAccount.some(s => s.id === t.id)));
+        fetchPending();
       }
     } catch { setResult({ success: 0, failed: selectedWithAccount.length }); }
     finally { setPosting(false); }
@@ -211,8 +245,13 @@ export default function UPICapturePage() {
       )}
 
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, background: "var(--bg-hover)", borderRadius: 12, padding: 4 }}>
-        {([["sms", "SMS / Text", "sms"], ["csv", "CSV Import", "upload_file"], ["manual", "Manual", "edit"]] as const).map(([id, label, icon]) => (
+      <div style={{ display: "flex", gap: 4, background: "var(--bg-hover)", borderRadius: 12, padding: 4, flexWrap: "wrap" }}>
+        {([
+          ["sms", "SMS / Text", "sms"], 
+          ["csv", "CSV Import", "upload_file"], 
+          ["manual", "Manual", "edit"],
+          ["pending", `Pending Approval (${pendingTxns.length})`, "rule_folder"]
+        ] as const).map(([id, label, icon]) => (
           <button key={id} onClick={() => setTab(id)}
             style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8, padding: "10px 4px", borderRadius: 8, border: "none", cursor: "pointer", transition: "all 0.15s", background: tab === id ? "white" : "transparent", boxShadow: tab === id ? "0 2px 8px var(--bg-icon)" : "none", fontFamily: "'Plus Jakarta Sans',sans-serif", fontSize: 13, fontWeight: 600, color: tab === id ? "var(--text-accent)" : "var(--text-muted)" }}>
             <Icon name={icon} size={18} color={tab === id ? "var(--text-accent)" : "var(--text-muted)"} /> {label}
@@ -282,17 +321,16 @@ export default function UPICapturePage() {
       )}
 
       {/* Staging table */}
-      {txns.length > 0 && (
+      {tab === "pending" && pendingTxns.length > 0 && (
         <div style={{ ...card, overflow: "hidden" }}>
           {/* Table header bar */}
           <div style={{ padding: "14px 16px", borderBottom: "1px solid var(--bg-card-border)", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 10 }}>
             <div>
               <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--text-body)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                {txns.length} Transactions Detected
+                {pendingTxns.length} Pending Transactions
               </h2>
               <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
                 Assign accounts, then post selected to ledger.
-                {" "}<span style={{ color: "var(--text-accent)", fontWeight: 600 }}>{txns.filter(t => t.matchStatus === "MATCHED").length} auto-matched</span>
               </p>
             </div>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
@@ -312,25 +350,24 @@ export default function UPICapturePage() {
           </div>
 
           {/* Column headers */}
-          <div style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 160px 100px 70px 60px", gap: 8, padding: "8px 16px", background: "rgba(240,243,255,0.6)", alignItems: "center" }}>
-            <input type="checkbox" checked={selectedCount === txns.length} onChange={e => toggleAll(e.target.checked)}
+          <div style={{ display: "grid", gridTemplateColumns: "32px 90px 1fr 160px 100px 70px 90px", gap: 8, padding: "8px 16px", background: "rgba(240,243,255,0.6)", alignItems: "center" }}>
+            <input type="checkbox" checked={selectedCount === pendingTxns.length} onChange={e => toggleAll(e.target.checked)}
               style={{ width: 15, height: 15, cursor: "pointer", accentColor: "var(--text-accent)" }} />
-            {["Date", "Merchant / Description", "Account to assign", "Amount", "Type", ""].map((h, i) => (
-              <p key={i} style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: i >= 3 ? "right" : "left", margin: 0 }}>{h}</p>
+            {["Date", "Merchant / Description", "Account to assign", "Amount", "Type", "Actions"].map((h, i) => (
+              <p key={i} style={{ fontSize: 10, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.05em", fontFamily: "'Plus Jakarta Sans',sans-serif", textAlign: i === 3 ? "right" : "left", margin: 0 }}>{h}</p>
             ))}
           </div>
 
-          {txns.slice(0, 100).map((t, i) => {
-            const isMatched = t.matchStatus === "MATCHED" && !!t.accountId;
+          {pendingTxns.slice(0, 100).map((t, i) => {
             const isReady = !!t.accountId;
             return (
               <div key={t.id} style={{
-                display: "grid", gridTemplateColumns: "32px 90px 1fr 160px 100px 70px 60px", gap: 8, padding: "10px 16px",
+                display: "grid", gridTemplateColumns: "32px 90px 1fr 160px 100px 70px 90px", gap: 8, padding: "10px 16px",
                 borderBottom: "1px solid var(--bg-card-border)",
-                background: isMatched ? "rgba(220,242,232,0.18)" : i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.15)",
+                background: i % 2 === 0 ? "transparent" : "rgba(240,243,255,0.15)",
                 alignItems: "center",
               }}>
-                <input type="checkbox" checked={t.selected} onChange={() => toggleSelect(t.id)}
+                <input type="checkbox" checked={t.selected || false} onChange={() => setPendingTxns(prev => prev.map(p => p.id === t.id ? { ...p, selected: !p.selected } : p))}
                   style={{ width: 15, height: 15, cursor: "pointer", accentColor: "var(--text-accent)" }} />
                 <span style={{ fontSize: 12, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>{t.date}</span>
                 <div style={{ minWidth: 0 }}>
@@ -342,12 +379,12 @@ export default function UPICapturePage() {
                 <div>
                   <select
                     value={t.accountId || ""}
-                    onChange={e => setAccount(t.id, e.target.value)}
+                    onChange={e => setPendingTxns(prev => prev.map(p => p.id === t.id ? { ...p, accountId: e.target.value } : p))}
                     style={{
                       width: "100%", padding: "5px 8px", fontSize: 12,
                       border: `1px solid ${isReady ? "var(--text-accent)" : "var(--input-border)"}`,
                       borderRadius: 8, fontFamily: "'Plus Jakarta Sans',sans-serif",
-                      background: isMatched ? "var(--bg-hover)" : "white",
+                      background: "white",
                       color: isReady ? "var(--text-body)" : "var(--placeholder)", outline: "none", cursor: "pointer",
                     }}>
                     <option value="">— Select account —</option>
@@ -357,7 +394,7 @@ export default function UPICapturePage() {
                 <p style={{ textAlign: "right", fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: t.type === "DEBIT" ? "var(--text-danger)" : "var(--text-accent)", fontWeight: 700 }}>
                   {inr(t.amount)}
                 </p>
-                <div style={{ textAlign: "right" }}>
+                <div style={{ textAlign: "left" }}>
                   <span style={{
                     display: "inline-block", fontSize: 10, padding: "3px 7px", borderRadius: 9999, fontWeight: 700,
                     fontFamily: "'Plus Jakarta Sans',sans-serif",
@@ -366,18 +403,26 @@ export default function UPICapturePage() {
                   }}>{t.type}</span>
                 </div>
                 <div style={{ textAlign: "right" }}>
-                  {isMatched
-                    ? <span title="Auto-matched by rule"><Icon name="auto_awesome" size={15} color="var(--text-accent)" /></span>
-                    : <span style={{ fontSize: 10, color: "var(--placeholder)" }}>{t.source}</span>}
+                   <button 
+                     onClick={async () => {
+                       const reason = prompt("Rejection Reason:");
+                       if (reason) {
+                         await fetch(`/api/upi/staging/${t.id}/reject`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reason }) });
+                         fetchPending();
+                       }
+                     }}
+                     style={{ border: "none", background: "none", color: "var(--text-danger)", cursor: "pointer", fontSize: 11 }}>
+                     Reject
+                   </button>
                 </div>
               </div>
             );
           })}
 
-          {txns.length > 100 && (
+          {pendingTxns.length > 100 && (
             <div style={{ padding: "10px 16px", textAlign: "center", borderTop: "1px solid var(--bg-card-border)" }}>
               <p style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-                Showing 100 of {txns.length}. Assign accounts and post in batches.
+                Showing 100 of {pendingTxns.length}. Assign accounts and post in batches.
               </p>
             </div>
           )}
@@ -394,14 +439,14 @@ export default function UPICapturePage() {
         </div>
       )}
 
-      {txns.length === 0 && !loading && tab === "sms" && !smsText && (
+      {pendingTxns.length === 0 && !loading && tab === "pending" && (
         <div style={{ ...card, padding: 48, textAlign: "center" }}>
-          <Icon name="sms" size={44} color="var(--input-border)" />
+          <Icon name="check_circle" size={44} color="var(--text-accent)" />
           <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-muted-2)", marginTop: 12, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            Paste bank SMS messages above
+            All caught up!
           </p>
           <p style={{ fontSize: 12, color: "var(--placeholder)", marginTop: 6, fontFamily: "'Plus Jakarta Sans',sans-serif" }}>
-            Transactions are detected automatically — you verify and post.
+            There are no pending UPI transactions to approve.
           </p>
         </div>
       )}

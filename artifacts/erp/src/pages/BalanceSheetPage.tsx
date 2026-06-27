@@ -2,6 +2,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { inr } from "@/lib/utils/format";
 import { Link } from "wouter";
+import { exportToExcel, exportToPDF } from "@/lib/utils/export";
 
 function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
   return (
@@ -52,7 +53,7 @@ export default function BalanceSheetPage() {
   useEffect(() => {
     setLoading(true);
     fetch(`/api/reports/balance-sheet?asAt=${asAt}`)
-      .then(r => r.json()).then(setData).finally(() => setLoading(false));
+      .then(r => r.ok ? r.json() : null).then(d => d && setData(d)).catch(() => {}).finally(() => setLoading(false));
   }, [asAt]);
 
   const bs = data || { totalAssets: 0, totalEquityLiabilities: 0, balanced: false, equity: { capital: 0, netProfit: 0, drawings: 0, total: 0 }, currentLiabilities: 0, breakdown: [] };
@@ -67,12 +68,58 @@ export default function BalanceSheetPage() {
         <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: 12, color: "var(--text-muted)", padding: "4px 10px", border: "1px solid var(--input-border)", borderRadius: 8 }}>{asAt}</span>
       </div>
 
-      <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", justifyContent: "space-between" }}>
         <input type="date" value={asAt} onChange={e => setAsAt(e.target.value)}
-          style={{ flex: 1, minWidth: 0, padding: "10px 14px", border: "1px solid var(--input-border)", borderRadius: 8, fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "var(--text-body)", background: "white", outline: "none" }} />
-        <button onClick={() => window.print()} className="btn-ghost" style={{ fontSize: 12 }}>
-          <Icon name="print" size={16} /> Print
-        </button>
+          style={{ width: "200px", padding: "10px 14px", border: "1px solid var(--input-border)", borderRadius: 8, fontFamily: "'JetBrains Mono',monospace", fontSize: 13, color: "var(--text-body)", background: "white", outline: "none" }} />
+        <div style={{ display: "flex", gap: 8 }}>
+          <button onClick={() => window.print()} className="btn-ghost" style={{ fontSize: 12 }}>
+            <Icon name="print" size={16} /> Print
+          </button>
+          <button 
+            onClick={() => {
+              const dataToExport = [
+                ["EQUITY & LIABILITIES", ""],
+                ["Capital Account", bs.equity?.capital ?? 0],
+                ["Net Profit", bs.equity?.netProfit ?? 0],
+                ["Drawings", -(bs.equity?.drawings ?? 0)],
+                ["Total Equity", bs.equity?.total ?? 0],
+                ["", ""],
+                ["Current Liabilities", bs.currentLiabilities ?? 0],
+                ["Total Equity & Liabilities", bs.totalEquityLiabilities],
+                ["", ""],
+                ["ASSETS", ""],
+                ...(bs.breakdown?.map((item: any) => [item.name, item.amount]) || []),
+                ["Total Assets", bs.totalAssets]
+              ];
+              exportToPDF("balance_sheet", `Balance Sheet As At ${asAt}`, ["Account", "Amount"], dataToExport);
+            }} 
+            className="btn-outline" style={{ fontSize: 12 }}
+          >
+            <Icon name="picture_as_pdf" size={16} /> PDF
+          </button>
+          <button 
+            onClick={() => {
+              const dataToExport = [
+                ["EQUITY & LIABILITIES", ""],
+                ["Capital Account", bs.equity?.capital ?? 0],
+                ["Net Profit", bs.equity?.netProfit ?? 0],
+                ["Drawings", -(bs.equity?.drawings ?? 0)],
+                ["Total Equity", bs.equity?.total ?? 0],
+                ["", ""],
+                ["Current Liabilities", bs.currentLiabilities ?? 0],
+                ["Total Equity & Liabilities", bs.totalEquityLiabilities],
+                ["", ""],
+                ["ASSETS", ""],
+                ...(bs.breakdown?.map((item: any) => [item.name, item.amount]) || []),
+                ["Total Assets", bs.totalAssets]
+              ];
+              exportToExcel("balance_sheet", ["Account", "Amount"], dataToExport);
+            }} 
+            className="btn-primary" style={{ fontSize: 12 }}
+          >
+            <Icon name="table_view" size={16} color="white" /> Excel
+          </button>
+        </div>
       </div>
 
       {!loading && (

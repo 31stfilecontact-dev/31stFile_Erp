@@ -2,6 +2,7 @@ import { Router } from "express";
 import { db } from "@workspace/db";
 import { accounts, entries, entryLines } from "@workspace/db";
 import { eq, and, lte, gte, sql, asc, desc } from "drizzle-orm";
+import { gstLines, tdsDeductions, vendors, hsnCodes, tdsSections } from "@workspace/db";
 import { requireAuth } from "./auth";
 
 const router = Router();
@@ -242,6 +243,77 @@ router.get("/reports/dashboard", requireAuth, async (_req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Failed to load dashboard" });
+  }
+});
+
+router.get("/reports/gst-summary", requireAuth, async (req, res) => {
+  try {
+    const { from, to } = req.query as { from?: string, to?: string };
+    const dateFrom = from || new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split("T")[0];
+    const dateTo = to || new Date().toISOString().split("T")[0];
+    
+    const lines = await db.select({
+      hsnCode: gstLines.hsnCode,
+      description: hsnCodes.description,
+      taxableAmount: sql<number>`sum(${gstLines.taxableAmount})`,
+      cgstAmount: sql<number>`sum(${gstLines.cgstAmount})`,
+      sgstAmount: sql<number>`sum(${gstLines.sgstAmount})`,
+      igstAmount: sql<number>`sum(${gstLines.igstAmount})`,
+      totalGst: sql<number>`sum(${gstLines.totalGst})`,
+      voucherType: entries.voucherType
+    })
+    .from(gstLines)
+    .innerJoin(entries, eq(gstLines.entryId, entries.id))
+    .leftJoin(hsnCodes, eq(gstLines.hsnCode, hsnCodes.code))
+    .where(and(gte(entries.entryDate, dateFrom), lte(entries.entryDate, dateTo)))
+    .groupBy(gstLines.hsnCode, hsnCodes.description, entries.voucherType);
+    
+    const outward = lines.filter(l => l.voucherType === "SALES" || l.voucherType === "RECEIPT");
+    const inward = lines.filter(l => l.voucherType === "PURCHASE" || l.voucherType === "PAYMENT");
+
+    res.json({
+      outward,
+      inward, 
+      period: { from: dateFrom, to: dateTo }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch GST summary" });
+  }
+});
+
+router.get("/reports/tds-summary", requireAuth, async (req, res) => {
+  try {
+    const { from, to, section } = req.query as { from?: string, to?: string, section?: string };
+    const dateFrom = from || new Date(new Date().getFullYear(), 3, 1).toISOString().split("T")[0]; // default to start of FY
+    const dateTo = to || new Date().toISOString().split("T")[0];
+    
+    let conds = [gte(entries.entryDate, dateFrom), lte(entries.entryDate, dateTo)];
+    if (section) conds.push(eq(tdsDeductions.sectionCode, section));
+    
+    const lines = await db.select({
+      vendorName: vendors.name,
+      pan: vendors.pan,
+      section: tdsDeductions.sectionCode,
+      baseAmount: sql<number>`sum(${tdsDeductions.baseAmount})`,
+      tdsAmount: sql<number>`sum(${tdsDeductions.tdsAmount})`,
+      fy: tdsDeductions.financialYear
+    })
+    .from(tdsDeductions)
+    .innerJoin(entries, eq(tdsDeductions.entryId, entries.id))
+    .innerJoin(vendors, eq(tdsDeductions.vendorId, vendors.id))
+    .where(and(...conds))
+    .groupBy(vendors.name, vendors.pan, tdsDeductions.sectionCode, tdsDeductions.financialYear);
+    
+    const totalTds = lines.reduce((s, row) => s + Number(row.tdsAmount), 0);
+    
+    res.json({
+      rows: lines,
+      totalTds
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Failed to fetch TDS summary" });
   }
 });
 

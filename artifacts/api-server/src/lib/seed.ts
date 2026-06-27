@@ -1,72 +1,54 @@
 import { db } from "@workspace/db";
-import { users, accounts } from "@workspace/db";
-import bcrypt from "bcryptjs";
-import { randomUUID } from "crypto";
+import { hsnCodes, tdsSections } from "@workspace/db";
+import { count } from "drizzle-orm";
 
-const DEFAULT_ACCOUNTS = [
-  { code: "1001", name: "Cash in Hand",          group: "Assets",      normalBal: "DR" },
-  { code: "1002", name: "Bank — Current A/c",     group: "Assets",      normalBal: "DR" },
-  { code: "1101", name: "Trade Receivables",       group: "Assets",      normalBal: "DR" },
-  { code: "1201", name: "Advances & Deposits",     group: "Assets",      normalBal: "DR" },
-  { code: "2001", name: "Trade Payables",          group: "Liabilities", normalBal: "CR" },
-  { code: "2101", name: "GST Payable",             group: "Liabilities", normalBal: "CR" },
-  { code: "3001", name: "Capital Account",         group: "Equity",      normalBal: "CR" },
-  { code: "3002", name: "Drawings",                group: "Equity",      normalBal: "DR" },
-  { code: "4101", name: "Sales Revenue",           group: "Income",      normalBal: "CR" },
-  { code: "4102", name: "Other Income",            group: "Income",      normalBal: "CR" },
-  { code: "5101", name: "Salary & Wages",          group: "Expenses",    normalBal: "DR" },
-  { code: "5102", name: "Rent Expense",            group: "Expenses",    normalBal: "DR" },
-  { code: "5103", name: "Office Expenses",         group: "Expenses",    normalBal: "DR" },
-  { code: "5104", name: "Travel & Conveyance",     group: "Expenses",    normalBal: "DR" },
-  { code: "5105", name: "Professional Fees",       group: "Expenses",    normalBal: "DR" },
-  { code: "5106", name: "Bank Charges",            group: "Expenses",    normalBal: "DR" },
-  { code: "5107", name: "Depreciation",            group: "Expenses",    normalBal: "DR" },
-  { code: "4999", name: "Miscellaneous Expenses",  group: "Expenses",    normalBal: "DR" },
+const hsnSeedData = [
+  { code: "9983", description: "Information Technology (IT) services", cgstRate: "0.00", sgstRate: "0.00", igstRate: "18.00", type: "SAC" },
+  { code: "9985", description: "Support services", cgstRate: "0.00", sgstRate: "0.00", igstRate: "18.00", type: "SAC" },
+  { code: "9954", description: "Construction services", cgstRate: "0.00", sgstRate: "0.00", igstRate: "12.00", type: "SAC" },
+  { code: "9971", description: "Financial and related services", cgstRate: "0.00", sgstRate: "0.00", igstRate: "18.00", type: "SAC" },
+  { code: "9992", description: "Education services", cgstRate: "0.00", sgstRate: "0.00", igstRate: "0.00", type: "SAC" },
+  { code: "8471", description: "Computers/laptops", cgstRate: "0.00", sgstRate: "0.00", igstRate: "18.00", type: "HSN" },
+  { code: "8443", description: "Printers/copiers", cgstRate: "0.00", sgstRate: "0.00", igstRate: "18.00", type: "HSN" },
+  { code: "6109", description: "T-shirts/clothing", cgstRate: "0.00", sgstRate: "0.00", igstRate: "12.00", type: "HSN" },
+  { code: "0401", description: "Milk/dairy", cgstRate: "0.00", sgstRate: "0.00", igstRate: "0.00", type: "HSN" },
+  { code: "2106", description: "Food preparations", cgstRate: "0.00", sgstRate: "0.00", igstRate: "5.00", type: "HSN" },
+  { code: "4820", description: "Stationery/registers", cgstRate: "0.00", sgstRate: "0.00", igstRate: "12.00", type: "HSN" },
+  { code: "7326", description: "Iron/steel articles", cgstRate: "0.00", sgstRate: "0.00", igstRate: "18.00", type: "HSN" },
+  { code: "3304", description: "Cosmetics", cgstRate: "0.00", sgstRate: "0.00", igstRate: "28.00", type: "HSN" },
+  { code: "2710", description: "Petrol/diesel", cgstRate: "0.00", sgstRate: "0.00", igstRate: "0.00", type: "HSN" },
+  { code: "9021", description: "Medical equipment", cgstRate: "0.00", sgstRate: "0.00", igstRate: "5.00", type: "HSN" },
 ];
 
-export async function seedIfNeeded() {
+const tdsSeedData = [
+  { code: "194C", description: "Payment to contractors", individualRate: "1.00", companyRate: "2.00", thresholdSingle: "30000.00", thresholdAggregate: "100000.00" },
+  { code: "194J", description: "Professional/technical fees", individualRate: "10.00", companyRate: "10.00", thresholdSingle: "30000.00" },
+  { code: "194I", description: "Rent", individualRate: "10.00", companyRate: "10.00", thresholdSingle: "240000.00" },
+  { code: "194H", description: "Commission/brokerage", individualRate: "5.00", companyRate: "5.00", thresholdSingle: "15000.00" },
+  { code: "194A", description: "Interest (other than securities)", individualRate: "10.00", companyRate: "10.00", thresholdSingle: "40000.00" },
+  { code: "194B", description: "Lottery/prize winnings", individualRate: "30.00", companyRate: "30.00", thresholdSingle: "10000.00" },
+  { code: "194D", description: "Insurance commission", individualRate: "5.00", companyRate: "5.00", thresholdSingle: "15000.00" },
+  { code: "194G", description: "Commission on lottery tickets", individualRate: "5.00", companyRate: "5.00", thresholdSingle: "15000.00" },
+  { code: "194LA", description: "Compensation for acquisition", individualRate: "10.00", companyRate: "10.00", thresholdSingle: "250000.00" },
+  { code: "192", description: "Salary", individualRate: "0.00", companyRate: "0.00" },
+  { code: "194Q", description: "Purchase of goods", individualRate: "0.10", companyRate: "0.10", thresholdAggregate: "5000000.00" },
+  { code: "206C(1H)", description: "TCS on sale of goods", individualRate: "0.10", companyRate: "0.10" },
+];
+
+export async function seedIfEmpty() {
   try {
-    // Seed admin user only if no users exist AND ADMIN_EMAIL + ADMIN_PASSWORD are set
-    const existingUsers = await db.select().from(users).limit(1);
-    if (existingUsers.length === 0) {
-      const adminEmail = process.env.ADMIN_EMAIL;
-      const adminPassword = process.env.ADMIN_PASSWORD;
-
-      if (adminEmail && adminPassword) {
-        const hash = await bcrypt.hash(adminPassword, 12);
-        await db.insert(users).values({
-          id: randomUUID(),
-          email: adminEmail.toLowerCase(),
-          name: "Admin",
-          passwordHash: hash,
-          role: "admin",
-        }).onConflictDoNothing();
-        console.log(`Seeded admin user: ${adminEmail}`);
-      } else {
-        console.warn(
-          "No users exist and ADMIN_EMAIL / ADMIN_PASSWORD are not set. " +
-          "Set both environment variables to create the initial admin account on first start."
-        );
-      }
+    const [{ count: hsnCount }] = await db.select({ count: count() }).from(hsnCodes);
+    if (hsnCount === 0) {
+      console.log("Seeding HSN codes...");
+      await db.insert(hsnCodes).values(hsnSeedData);
     }
 
-    // Seed chart of accounts regardless
-    const existingAccounts = await db.select().from(accounts).limit(1);
-    if (existingAccounts.length === 0) {
-      await db.insert(accounts).values(
-        DEFAULT_ACCOUNTS.map(a => ({
-          id: randomUUID(),
-          code: a.code,
-          name: a.name,
-          group: a.group,
-          subGroup: null,
-          normalBal: a.normalBal,
-          isSystem: true,
-        }))
-      ).onConflictDoNothing();
-      console.log("Seeded default chart of accounts");
+    const [{ count: tdsCount }] = await db.select({ count: count() }).from(tdsSections);
+    if (tdsCount === 0) {
+      console.log("Seeding TDS sections...");
+      await db.insert(tdsSections).values(tdsSeedData);
     }
-  } catch (err) {
-    console.error("Seed error:", err);
+  } catch (error) {
+    console.error("Failed to seed database:", error);
   }
 }

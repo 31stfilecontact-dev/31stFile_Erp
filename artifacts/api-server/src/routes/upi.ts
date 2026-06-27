@@ -44,7 +44,7 @@ router.post("/upi/rules", requireAuth, async (req, res) => {
 
 router.delete("/upi/rules/:id", requireAuth, async (req, res) => {
   try {
-    await db.delete(upiRules).where(eq(upiRules.id, req.params.id));
+    await db.delete(upiRules).where(eq(upiRules.id, req.params.id as string));
     res.json({ ok: true });
   } catch {
     res.status(500).json({ error: "Failed to delete rule" });

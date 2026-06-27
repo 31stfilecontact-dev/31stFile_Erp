@@ -3,10 +3,10 @@ import { Link } from "wouter";
 import { inr } from "@/lib/utils/format";
 import { useTheme } from "@/context/ThemeContext";
 
-function Icon({ name, size = 22, color = "" }: { name: string; size?: number; color?: string }) {
+function Icon({ name, size = 20, color = "", style }: { name: string; size?: number; color?: string; style?: React.CSSProperties }) {
   return (
     <span className="material-symbols-outlined select-none"
-      style={{ fontSize: size, lineHeight: 1, color: color || "inherit" }}>
+      style={{ fontSize: size, lineHeight: 1, color: color || "inherit", ...style }}>
       {name}
     </span>
   );
@@ -22,7 +22,7 @@ export default function DashboardPage() {
 
   useEffect(() => {
     fetch("/api/reports/dashboard")
-      .then(r => r.json())
+      .then(r => r.ok ? r.json() : null)
       .then(setStats)
       .catch(() => {})
       .finally(() => setLoading(false));

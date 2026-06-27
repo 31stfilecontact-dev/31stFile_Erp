@@ -50,7 +50,8 @@ export default function LedgerPage() {
     try {
       const r = await fetch(`/api/accounts/${encodeURIComponent(code)}/ledger?from=${f}&to=${t}`);
       if (!r.ok) { setError("Account not found"); setLoading(false); return; }
-      setData(await r.json());
+      const d = await (r.ok ? r.json() : Promise.resolve(null));
+      setData(d);
     } catch { setError("Failed to load ledger"); }
     setLoading(false);
   }, [code]);

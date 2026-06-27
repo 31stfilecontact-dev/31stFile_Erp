@@ -14,12 +14,17 @@ function Icon({ name, size = 22, color = "" }: { name: string; size?: number; co
 const NAV_ITEMS = [
   { path: "/dashboard",     icon: "home",           label: "Dashboard" },
   { path: "/accounts",      icon: "account_tree",   label: "Accounts" },
+  { path: "/vendors",       icon: "group",          label: "Vendors" },
   { path: "/transactions",  icon: "receipt_long",   label: "Transactions" },
   { path: "/journal-entry", icon: "edit_note",      label: "New Entry" },
   { path: "/upi-capture",   icon: "phone_iphone",   label: "UPI Capture" },
+  { path: "/import",        icon: "upload_file",    label: "Import CSV" },
   { path: "/trial-balance", icon: "balance",        label: "Trial Balance" },
   { path: "/pl-statement",  icon: "trending_up",    label: "P&L" },
   { path: "/balance-sheet", icon: "account_balance",label: "Balance Sheet" },
+  { path: "/masters",       icon: "library_books",  label: "Masters" },
+  { path: "/gst-returns",   icon: "receipt_long",   label: "GST Returns" },
+  { path: "/tds-returns",   icon: "assignment",     label: "TDS Returns" },
   { path: "/notes",         icon: "description",    label: "Notes" },
   { path: "/settings",      icon: "settings",       label: "Settings" },
 ];

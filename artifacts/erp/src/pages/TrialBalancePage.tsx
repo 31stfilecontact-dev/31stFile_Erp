@@ -2,6 +2,7 @@ import { useTheme } from "@/context/ThemeContext";
 import { useEffect, useState } from "react";
 import { inr } from "@/lib/utils/format";
 import { Link } from "wouter";
+import { exportToExcel, exportToPDF } from "@/lib/utils/export";
 
 function Icon({ name, size = 20, color = "" }: { name: string; size?: number; color?: string }) {
   return (
@@ -24,8 +25,8 @@ export default function TrialBalancePage() {
 
   useEffect(() => {
     setLoading(true);
-    fetch(`/api/reports/trial-balance?asAt=${asAt}`)
-      .then(r => r.json()).then(setData).finally(() => setLoading(false));
+      fetch(`/api/reports/trial-balance?asAt=${asAt}`)
+        .then(r => r.ok ? r.json() : null).then(d => d && setData(d)).catch(() => {}).finally(() => setLoading(false));
   }, [asAt]);
 
   const tb = data || { rows: [], totalDr: 0, totalCr: 0, balanced: false };
@@ -41,18 +42,34 @@ export default function TrialBalancePage() {
       </div>
 
       {/* Controls */}
-      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
-        <div>
-          <label className="label-field">As At</label>
-          <input type="date" className="input-field" value={asAt} onChange={e => setAsAt(e.target.value)} />
+      <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap", justifyContent: "space-between" }}>
+        <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+          <div>
+            <label className="label-field">As At</label>
+            <input type="date" className="input-field" value={asAt} onChange={e => setAsAt(e.target.value)} />
+          </div>
+          <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif", cursor: "pointer", marginTop: 20 }}>
+            <input type="checkbox" checked={hideZero} onChange={e => setHideZero(e.target.checked)} />
+            Hide zero-balance accounts
+          </label>
         </div>
-        <label style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "var(--text-muted-2)", fontFamily: "'Plus Jakarta Sans',sans-serif", cursor: "pointer", marginTop: 20 }}>
-          <input type="checkbox" checked={hideZero} onChange={e => setHideZero(e.target.checked)} />
-          Hide zero-balance accounts
-        </label>
-        <button onClick={() => window.print()} className="btn-ghost" style={{ fontSize: 12, marginTop: 20 }}>
-          <Icon name="print" size={16} /> Print
-        </button>
+        <div style={{ display: "flex", gap: 8, marginTop: 20 }}>
+          <button onClick={() => window.print()} className="btn-ghost" style={{ fontSize: 12 }}>
+            <Icon name="print" size={16} /> Print
+          </button>
+          <button 
+            onClick={() => exportToPDF("trial_balance", `Trial Balance As At ${asAt}`, ["Code", "Account Name", "Group", "Debit", "Credit"], rows.map((r: any) => [r.code, r.name, r.group, r.dr, r.cr]))} 
+            className="btn-outline" style={{ fontSize: 12 }}
+          >
+            <Icon name="picture_as_pdf" size={16} /> PDF
+          </button>
+          <button 
+            onClick={() => exportToExcel("trial_balance", ["Code", "Account Name", "Group", "Debit", "Credit"], rows.map((r: any) => [r.code, r.name, r.group, r.dr, r.cr]))} 
+            className="btn-primary" style={{ fontSize: 12 }}
+          >
+            <Icon name="table_view" size={16} color="white" /> Excel
+          </button>
+        </div>
       </div>
 
       {/* Balance check */}
