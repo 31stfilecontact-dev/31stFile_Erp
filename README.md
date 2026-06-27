@@ -64,3 +64,28 @@ This project uses Docker Compose for a streamlined production deployment.
    The application will be served via Nginx on standard HTTP port `80`. Navigate to your server's IP address or domain name in your browser.
 
 > **Note**: For HTTPS (SSL), you will need to map an SSL certificate to the Nginx container or put this setup behind an additional reverse proxy like Cloudflare, Traefik, or an AWS Application Load Balancer.
+
+---
+
+## Single Button Deployment (GitHub Actions)
+
+You can trigger a completely automated deployment to your Virtual Private Server (VPS) directly from GitHub using the **"Run workflow"** button.
+
+### 1. Server Prerequisites
+- Ensure your server has Docker and Docker Compose installed.
+- Clone this repository into `/opt/31stFile_Erp` on your server.
+- Create your `.env.production` file inside that directory.
+
+### 2. Configure GitHub Secrets
+Go to your GitHub repository -> **Settings** -> **Secrets and variables** -> **Actions** -> **New repository secret**, and add the following:
+- `SERVER_HOST`: The IP address of your VPS (e.g., `192.168.1.100`)
+- `SERVER_USER`: Your SSH username (e.g., `root` or `ubuntu`)
+- `SERVER_SSH_KEY`: Your private SSH key (e.g., the contents of `~/.ssh/id_rsa`)
+
+### 3. Deploy
+1. Go to the **Actions** tab in your GitHub repository.
+2. Click on **Deploy to Production Server** in the left sidebar.
+3. Click the **Run workflow** dropdown on the right.
+4. Click the green **Run workflow** button!
+
+GitHub will automatically SSH into your server, pull the latest code, and spin up the new Docker containers with zero downtime!
